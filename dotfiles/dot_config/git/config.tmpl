@@ -1,0 +1,24 @@
+[user]
+  name = {{ .name }}
+  email = {{ .email }}
+  signingkey = ~/.ssh/keys/id_ed25519_github.pub
+[core]
+  editor = nano
+  autocrlf = true
+[credential]
+  helper = manager
+[init]
+  defaultBranch = main
+[pull]
+  rebase = false
+[push]
+  autoSetupRemote = true
+[gpg]
+  format = ssh
+[commit]
+  cleanup = verbatim
+  gpgsign = true
+[tag]
+  gpgsign = true
+[include]
+  path = ~/.config/delta/delta.gitconfig

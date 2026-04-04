@@ -1,0 +1,33 @@
+#! /bin/sh
+# ~/.bashrc
+# --------------------------------------------------------------------------------
+#
+# Carrega o .bashrc apenas para shells interativos
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# Define variáveis XDG se não estiverem definidas
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# Cria os diretórios XDG se não existirem
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+
+# Diretório base de configuração do Bash
+BASH_CONFIG_DIR="$XDG_CONFIG_HOME/bash"
+
+# Carrega todos os módulos em ordem (01, 02, 03...)
+if [ -d "$BASH_CONFIG_DIR" ]; then
+    for module in "$BASH_CONFIG_DIR"/*.sh; do
+        if [ -r "$module" ]; then
+            # Carrega o módulo
+            source "$module"
+        fi
+    done
+
+    # Limpa a variável do loop
+    unset module
+fi

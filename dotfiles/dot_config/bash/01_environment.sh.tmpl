@@ -1,0 +1,44 @@
+#!/bin/sh
+# ~/.config/bash/01_environment.sh
+# --------------------------------------------------------------------------------
+# Configurações do ambiente de shell
+# --------------------------------------------------------------------------------
+
+# Define o editor padrão
+export EDITOR='nano'
+
+# Opções do ls para cores automáticas
+export LS_OPTIONS='--color=auto'
+
+{{ if .system.is_windows -}}
+# Habilita links simbólicos nativos no MSYS2 (Git Bash)
+export MSYS="winsymlinks:native"
+
+# Adiciona o OpenSSH do Windows ao PATH para usar ssh/ssh-agent nativos
+export PATH="/c/Windows/System32/OpenSSH:$PATH"
+{{- end }}
+
+# Enables Fast Node Manager (fnm)
+eval "$(fnm env --use-on-cd --shell bash)"
+
+# Define o comportamento do comando less
+## -R: melhor exibição de caracteres de controle
+## -M: prompt longo, com nome do arquivo e informações da quantidade de linhas
+## -N: ativa números de linha
+## -S: ativa o 'chop-long-lines', ou seja, trunca linhas maiores que a tela (desativa o line wrap)
+## -~: desativa a exibição de '~' nas linhas após o fim do arquivo
+## -#3: configura o scroll horizontal para 3 posições por vez
+## -i: pesquisa case insensitive, a menos que haja letras maiúsculas na busca
+## -+F: desativa o 'quit-if-one-screen', ou seja, sempre entra no modo interativo, mesmo para saídas curtas
+## -+X: desativa o 'no-init', ou seja, sempre utiliza o alternate screen, limpando a tela ao sair
+## Utilizar cores
+### -DNk: números de linha pretos
+### -DPc: prompt cyano
+### -DRc: rscroll character cyano
+export LESS='-RMnS~#3i -+F -+X --use-color -DNk -DPkc -DRkc'
+
+# Define o charset utilizado
+export LESSCHARSET='utf-8'
+
+# Desabilita o histórico do less
+export LESSHISTFILE=-

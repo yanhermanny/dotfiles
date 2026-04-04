@@ -1,0 +1,53 @@
+# ~/.config/chezmoi/chezmoi.yaml
+# ---------------------------------------------------------------------
+# Configuração principal do chezmoi.
+# ---------------------------------------------------------------------
+{{- $isWindows := eq .chezmoi.os "windows" }}
+{{- $isLinux := eq .chezmoi.os "linux" }}
+{{- $isWSL := and $isLinux (contains (lower .chezmoi.kernel.osrelease) "microsoft") }}
+{{- $isWorkMachine := eq .chezmoi.hostname "VDICOR1W53-44" }}
+
+# Diretório-fonte dos dotfiles gerenciados pelo chezmoi
+sourceDir: "{{ .chezmoi.homeDir }}/.local/share/chezmoi"
+
+# Diretório de destino dos arquivos aplicados
+destDir: "{{ .chezmoi.homeDir }}"
+
+# Modo padrão
+mode: file
+
+# Editor integrado
+edit:
+  apply: true
+  watch: true
+
+# Atualização automática de templates e dotfiles
+update:
+  apply: true
+
+# Exibe diffs com 'delta'
+diff:
+  pager: delta
+
+# Dados customizados disponíveis para outros templates
+data:
+  name: "Yan Hermanny"
+  email: "{{ if $isWorkMachine }}prestador-yan.hermanny@b3.com.br{{ else }}88159884+yanhermanny@users.noreply.github.com{{ end }}"
+  github_user: "{{ if $isWorkMachine }}p-yhermanny{{ else }}yanhermanny{{ end }}"
+
+  system:
+    os: "{{ .chezmoi.os }}"
+    hostname: "{{ .chezmoi.hostname }}"
+    is_windows: {{ $isWindows }}
+    is_linux: {{ $isLinux }}
+    is_wsl: {{ $isWSL }}
+    is_work_machine: {{ $isWorkMachine }}
+    package_manager: "{{ if $isWindows }}winget{{ else }}apt{{ end }}"
+
+  paths:
+    config: "{{ .chezmoi.homeDir }}/.config"
+    data: "{{ .chezmoi.homeDir }}/.local/share"
+    state: "{{ .chezmoi.homeDir }}/.local/state"
+    cache: "{{ .chezmoi.homeDir }}/.cache"
+    bin: "{{ .chezmoi.homeDir }}/.local/bin"
+    tmp: "{{ if $isWindows }}$TEMP{{ else }}/tmp{{ end }}"

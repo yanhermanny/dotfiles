@@ -1,0 +1,62 @@
+#!/bin/sh
+# ~/.config/bash/03_aliases.sh
+# --------------------------------------------------------------------------------
+# Aliases
+# --------------------------------------------------------------------------------
+
+# ls Command Options
+#   -1: Lists all files and directories in one column.
+#   -h: Displays files sizes in a human-readable format (example: 1K, 234M, 2G).
+#   -F: Displays symbols for file types (* for executables, / for directories etc).
+#   -A: Lists all files except for current and previous dir indicators (., ..).
+#   -l: Displays detailed information about files and directories in table format.
+# --------------------------------------------------------------------------------
+{{ if .system.is_windows -}}
+# Set exclusions from ls command
+LS_EXCLUSIONS="-I desktop.ini"
+LS_EXCLUSIONS="$LS_EXCLUSIONS -I My\ Documents\*"
+LS_EXCLUSIONS="$LS_EXCLUSIONS -I NTUSER\*"
+LS_EXCLUSIONS="$LS_EXCLUSIONS -I ntuser\*"
+
+alias ls="command ls -F --color=auto $LS_EXCLUSIONS"
+{{ else -}}
+alias ls="command ls -F --color=auto"
+{{ end -}}
+
+alias la="ls -A"
+alias ll="ls -lhA"
+
+# Colorize grep
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# Change to root directory without space
+cd/() {
+  cd /
+}
+
+# Change to previous directory without space
+alias cd..='cd ../'
+alias ..='cd ../'
+
+# Put prompt to new line when cat file without trailing line
+cat() {
+  echo "`/bin/cat $@`"
+}
+
+{{ if .system.is_windows -}}
+# Uses tree command from Windows
+alias tree="tree.com //A"
+
+# Support opening Windows Explorer at path
+explorer() {
+  command explorer `cygpath -w $@`
+}
+{{- end }}
+
+# Uses delta for diff command
+alias diff="delta"
+
+# Alias for direct use of pip
+alias pip="python -m pip"
