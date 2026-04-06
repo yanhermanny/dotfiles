@@ -32,8 +32,8 @@ diff:
 # Dados customizados disponíveis para outros templates
 data:
   name: "Yan Hermanny"
-  email: "{{ if $isWorkMachine }}prestador-yan.hermanny@b3.com.br{{ else }}88159884+yanhermanny@users.noreply.github.com{{ end }}"
-  github_user: "{{ if $isWorkMachine }}p-yhermanny{{ else }}yanhermanny{{ end }}"
+  email: "{{ if $isWorkMachine }}yan.hermanny@b3.com.br{{ else }}88159884+yanhermanny@users.noreply.github.com{{ end }}"
+  github_user: "{{ if $isWorkMachine }}yhermanny{{ else }}yanhermanny{{ end }}"
 
   system:
     os: "{{ .chezmoi.os }}"
@@ -42,7 +42,6 @@ data:
     is_linux: {{ $isLinux }}
     is_wsl: {{ $isWSL }}
     is_work_machine: {{ $isWorkMachine }}
-    package_manager: "{{ if $isWindows }}winget{{ else }}apt{{ end }}"
 
   paths:
     config: "{{ .chezmoi.homeDir }}/.config"
