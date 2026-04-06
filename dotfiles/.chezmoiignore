@@ -1,1 +1,11 @@
 .config/chezmoi/
+
+{{- if not .system.is_windows }}
+.chezmoidata/windows/**
+.chezmoiscripts/windows/**
+{{- end }}
+
+{{- if not (or (.system.is_linux) (.system.is_wsl)) }}
+.chezmoidata/linux/**
+.chezmoiscripts/linux/**
+{{- end }}

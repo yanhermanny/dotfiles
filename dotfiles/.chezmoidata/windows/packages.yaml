@@ -1,0 +1,13 @@
+packages:
+  winget:
+    - Python.PythonInstallManager
+    - Git.Git
+    - Microsoft.PowerShell
+    - Schniz.fnm
+    - dandavison.delta
+    - 7zip.7zip
+    - ShareX.ShareX
+    - GitHub.cli
+    - Microsoft.PowerToys
+  pip:
+    - Pygments

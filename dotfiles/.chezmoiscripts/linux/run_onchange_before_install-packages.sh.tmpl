@@ -1,0 +1,33 @@
+{{- if not (or (.system.is_linux) (.system.is_wsl)) -}}
+#!/bin/bash
+
+set -e
+
+echo "[chezmoi] Sistema operacional detectado: Linux"
+echo "[chezmoi] Iniciando instalação declarativa..."
+
+sudo="sudo"
+{{ if eq .chezmoi.username "root" -}}
+$sudo=""
+{{ end -}}
+
+echo "[apt] Atualizando pacotes já instalados..."
+$sudo apt update && $sudo apt upgrade -y
+
+# Função para instalar pacote via apt
+install_apt_package() {
+  if dpkg -s "$1" &>/dev/null; then
+    echo "[apt] Ignorando: $1 já está instalado."
+  else
+    echo "[apt] Instalando $1..."
+    $sudo apt install -y "$1"
+  fi
+}
+
+echo "[chezmoi] Instalando pacotes via apt..."
+{{- range .packages.apt }}
+install_apt_package "{{ . }}"
+{{- end }}
+
+echo "[chezmoi] Instalação concluída com sucesso!"
+{{- end }}

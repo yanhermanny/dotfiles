@@ -1,0 +1,9 @@
+packages:
+  apt:
+    - sudo
+    - nano
+    - git
+    - git-lfs
+    - curl
+    - console-setup
+    - qemu-guest-agent

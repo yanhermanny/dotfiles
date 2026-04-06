@@ -1,5 +1,5 @@
 # 🏠 Dotfiles com Chezmoi
-Este repositório contém toda a minha configuração pessoal gerenciada com **chezmoi**, organizada de forma declarativa, modular e idempotente.
+Este repositório contém toda a minha configuração pessoal gerenciada com **chezmoi**, organizada de forma declarativa, modular e idempotente.\
 A seguir, está documentada a estrutura **atualizada** do projeto, bem como as convenções adotadas.
 
 ---
@@ -31,9 +31,15 @@ A estrutura dentro de `~/.local/share/chezmoi/` é a seguinte:
 │   ├── dot_bashrc
 │   ├── dot_bash_profile
 │   ├── .chezmoidata/
-│   │   └── packages.yaml         # Arquivo declarativo com listas de pacotes
+│   │   ├── linux/
+│   │   │   └── packages.yaml         # Arquivo declarativo com listas de pacotes do Linux
+│   │   └── windows/
+│   │       └── packages.yaml         # Arquivo declarativo com listas de pacotes do Windows
 │   ├── .chezmoiscripts/
-│   │   └── run_onchange_windows-install-packages.ps1.tmpl    # Script que instala pacotes no Windows (winget, pip, Python, Node)
+│   │   ├── linux/
+│   │   │   └── run_onchange_before_install-packages.sh.tmpl    # Script que instala pacotes no Linux
+│   │   └── windows/
+│   │       └── run_onchange_before_install-packages.ps1.tmpl   # Script que instala pacotes no Windows
 │   └── dot_config/
 │       ├── bash/
 │       │   ├── 01_environment.sh.tmpl
@@ -60,18 +66,16 @@ A estrutura foi pensada para:
 - Utilizar `.chezmoiscripts/` para automações idempotentes.
 
 ### 📁 `dotfiles/`
-Contém **todos** os arquivos que o chezmoi gerencia.
+Contém **todos** os arquivos que o chezmoi gerencia.\
 Cada arquivo corresponde à sua localização final na máquina do usuário.
 
 ### 📁 `dot_config/`
-Representa diretamente o conteúdo de `~/.config`.
-Por exemplo:
-`dot_config/git/config.tmpl  →  ~/.config/git/config`
+Representa diretamente o conteúdo de `~/.config`.\
+Por exemplo: `dot_config/git/config.tmpl  →  ~/.config/git/config`
 
 ### 📁 `.chezmoidata/`
-Armazena dados usados pelos templates.
-Aqui fica o arquivo:
-`packages.yaml`
+Armazena dados usados pelos templates.\
+Aqui fica o arquivo: `packages.yaml`
 
 Ele contém listas como:
 - pacotes winget
@@ -79,17 +83,10 @@ Ele contém listas como:
 - configurações variadas usadas pelos scripts
 
 ### 📁 `.chezmoiscripts/`
-Scripts executados automaticamente conforme regras do chezmoi.
-Por exemplo:
-`run_onchange_windows-install-packages.ps1.tmpl`
+Scripts executados automaticamente conforme regras do chezmoi.\
+Por exemplo: `run_onchange_before_install-packages.ps1.tmpl`
 
-Este script instala:
-- pacotes winget
-- Python via PIM
-- pacotes pip
-- Node LTS via fnm
-
-Ele é idempotente, podendo rodar repetidamente sem efeitos colaterais.
+Este script instala os pacotes declarados no `packages.yaml` e é idempotente, podendo rodar repetidamente sem efeitos colaterais.
 
 ---
 
@@ -171,8 +168,7 @@ Cria:\
 chezmoi add ~/.zshrc
 ```
 
-Gera:\
-`dot_zshrc`
+Gera: `dot_zshrc`
 
 #### **3.3. Transformar arquivo em template (quando necessário)**
 Se quiser torná-lo dinâmico:
@@ -257,9 +253,7 @@ Gera:\
 `dot_bashrc`
 
 ### 🟨 3. Adicionar scripts
-Criar em:\
-
-`dotfiles/.chezmoiscripts/`
+Criar em: `dotfiles/.chezmoiscripts/`
 
 Exemplos:
 ```text
@@ -274,7 +268,7 @@ As listas ficam em:\
 `dotfiles/.chezmoidata/packages.yaml`
 
 E o script PowerShell em:\
-`dotfiles/.chezmoiscripts/run_onchange_windows-install-packages.ps1.tmpl`
+`dotfiles/.chezmoiscripts/windows/run_onchange_before_install-packages.ps1.tmpl`
 
 interpreta automaticamente:
 - winget
