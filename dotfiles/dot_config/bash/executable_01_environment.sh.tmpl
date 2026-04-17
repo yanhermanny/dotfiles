@@ -19,14 +19,14 @@ export MSYS="winsymlinks:native"
 
 # Adiciona o OpenSSH do Windows ao PATH para usar ssh/ssh-agent nativos
 export PATH="/c/Windows/System32/OpenSSH:$PATH"
-{{- end }}
 
 # Enables Fast Node Manager (fnm)
 eval "$(fnm env --use-on-cd --shell bash)"
+{{- end }}
 
 {{ if (or .system.is_linux .system.is_wsl) -}}
 # Setup `pyenv` for Python version management
-export PYENV_ROOT="$XDG_DATA_HOME/.pyenv"
+export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init - bash)"
 {{- end }}
