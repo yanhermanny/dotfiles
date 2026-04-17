@@ -29,7 +29,10 @@ A estrutura dentro de `~/.local/share/chezmoi/` é a seguinte:
 │   ├── .chezmoi.yaml.tmpl        # Template da configuração do próprio chezmoi
 │   ├── .chezmoiignore            # Regras de ignorados
 │   ├── dot_bashrc
-│   ├── dot_bash_profile
+│   ├── dot_profile
+│   ├── empty_dot_hushlogin
+│   ├── remove_dot_bash_login
+│   ├── remove_dot_bash_profile
 │   ├── .chezmoidata/
 │   │   ├── linux/
 │   │   │   └── packages.yaml         # Arquivo declarativo com listas de pacotes do Linux
@@ -42,11 +45,11 @@ A estrutura dentro de `~/.local/share/chezmoi/` é a seguinte:
 │   │       └── run_onchange_before_install-packages.ps1.tmpl   # Script que instala pacotes no Windows
 │   └── dot_config/
 │       ├── bash/
-│       │   ├── 01_environment.sh.tmpl
-│       │   ├── 02_input.sh
-│       │   ├── 03_aliases.sh.tmpl
-│       │   ├── 04_git_setup.sh
-│       │   └── 05_prompt.sh
+│       │   ├── executable_01_environment.sh.tmpl
+│       │   ├── executable_02_input.sh
+│       │   ├── executable_03_aliases.sh.tmpl
+│       │   ├── executable_04_git_setup.sh
+│       │   └── executable_05_prompt.sh
 │       ├── delta/
 │       │   └── delta.gitconfig
 │       └── git/
@@ -102,7 +105,7 @@ O método recomendado:
 
 ##### **Linux / macOS**
 ```sh
-sh -c "$(curl -fsLS get.chezmoi.io)"
+sh -c "$(curl -fsLS get.chezmoi.io/lb)"
 ```
 
 ##### **Windows (PowerShell)**

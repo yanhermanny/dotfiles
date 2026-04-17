@@ -5,7 +5,7 @@
 .chezmoiscripts/windows/**
 {{- end }}
 
-{{- if not (or (.system.is_linux) (.system.is_wsl)) }}
+{{- if not (or .system.is_linux .system.is_wsl) }}
 .chezmoidata/linux/**
 .chezmoiscripts/linux/**
 {{- end }}

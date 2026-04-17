@@ -1,4 +1,4 @@
-{{- if not (or (.system.is_linux) (.system.is_wsl)) -}}
+{{- if (or .system.is_linux .system.is_wsl) -}}
 #!/bin/bash
 
 set -e
@@ -14,7 +14,9 @@ $sudo=""
 echo "[apt] Atualizando pacotes já instalados..."
 $sudo apt update && $sudo apt upgrade -y
 
-# Função para instalar pacote via apt
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes via apt
+# -------------------------------------------------------------------------------------
 install_apt_package() {
   if dpkg -s "$1" &>/dev/null; then
     echo "[apt] Ignorando: $1 já está instalado."
@@ -23,11 +25,87 @@ install_apt_package() {
     $sudo apt install -y "$1"
   fi
 }
+# -------------------------------------------------------------------------------------
 
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes via curl
+# -------------------------------------------------------------------------------------
+install_curl_package() {
+  if dpkg -s "$1" &>/dev/null; then
+    echo "[curl] Ignorando: $1 já está instalado."
+  else
+    echo "[curl] Instalando $1..."
+    curl -fsSL "$1" | bash
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes pip
+# -------------------------------------------------------------------------------------
+install_pip_package() {
+  if pip show "$1" &>/dev/null; then
+    echo "[pip] Ignorando: $1 já está instalado."
+  else
+    echo "[pip] Instalando $1..."
+    pip install --upgrade --upgrade-strategy eager "$1"
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes pipx
+# -------------------------------------------------------------------------------------
+install_pipx_package() {
+  if pipx list | grep -q "$1"; then
+    echo "[pipx] Ignorando: $1 já está instalado."
+  else
+    echo "[pipx] Instalando $1..."
+    pipx install "$1"
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# =====================================================================================
+# 1) Instalar pacotes via apt
+# =====================================================================================
 echo "[chezmoi] Instalando pacotes via apt..."
 {{- range .packages.apt }}
 install_apt_package "{{ . }}"
 {{- end }}
+# -------------------------------------------------------------------------------------
+
+# =====================================================================================
+# 2) Instalar pacotes via curl
+# =====================================================================================
+echo "[chezmoi] Instalando pacotes via curl..."
+{{- range .packages.curl }}
+install_curl_package "{{ . }}"
+{{- end }}
+# -------------------------------------------------------------------------------------
+
+# =====================================================================================
+# 3) Instalar Python mais recente via pyenv
+# =====================================================================================
+if ! pyenv versions --bare | grep -E '^3.' >/dev/null; then
+  pyenv install 3
+  pyenv global 3
+fi
+
+# 3.1) Instalar pacotes pip declarados
+# ====================================================================================
+echo "[chezmoi] Instalando pacotes pip declarados..."
+{{- range .packages.pip }}
+install_pip_package "{{ . }}"
+{{- end }}
+
+# 3.2) Instalar pacotes pipx declarados
+# ====================================================================================
+echo "[chezmoi] Instalando pacotes pipx declarados..."
+{{- range .packages.pipx }}
+install_pipx_package "{{ . }}"
+{{- end }}
+# -------------------------------------------------------------------------------------
 
 echo "[chezmoi] Instalação concluída com sucesso!"
 {{- end }}

@@ -42,11 +42,3 @@ data:
     is_linux: {{ $isLinux }}
     is_wsl: {{ $isWSL }}
     is_work_machine: {{ $isWorkMachine }}
-
-  paths:
-    config: "{{ .chezmoi.homeDir }}/.config"
-    data: "{{ .chezmoi.homeDir }}/.local/share"
-    state: "{{ .chezmoi.homeDir }}/.local/state"
-    cache: "{{ .chezmoi.homeDir }}/.cache"
-    bin: "{{ .chezmoi.homeDir }}/.local/bin"
-    tmp: "{{ if $isWindows }}$TEMP{{ else }}/tmp{{ end }}"

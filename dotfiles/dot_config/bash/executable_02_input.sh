@@ -57,10 +57,10 @@ bind '"\e[1~": beginning-of-line'
 # Mapeia a tecla End para ir para o fim da linha (com o ^[[F)
 bind '"\e[4~": end-of-line'
 
-# ESC deletes the whole line
+# ESC deleta a linha inteira
 bind '"\e":kill-whole-line'
 
-# CTRL+L clears the display
+# CTRL+L limpa a tela
 bind '"\C-l":clear-display'
 # ================================================================================
 

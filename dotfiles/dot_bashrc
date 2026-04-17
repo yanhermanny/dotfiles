@@ -9,12 +9,13 @@ case $- in
 esac
 
 # Define variáveis XDG se não estiverem definidas
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_BIN_HOME="$HOME/.local/bin"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
 
 # Cria os diretórios XDG se não existirem
-mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
 
 # Diretório base de configuração do Bash
 BASH_CONFIG_DIR="$XDG_CONFIG_HOME/bash"

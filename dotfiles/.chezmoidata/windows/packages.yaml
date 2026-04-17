@@ -9,5 +9,7 @@ packages:
     - ShareX.ShareX
     - GitHub.cli
     - Microsoft.PowerToys
+    - sharkdp.bat
   pip:
-    - Pygments
+    - pipx
+  pipx:

@@ -4,6 +4,9 @@
 # Configurações do ambiente de shell
 # --------------------------------------------------------------------------------
 
+# Adiciona o diretório de binários do usuário ao PATH
+export PATH="$XDG_BIN_HOME:$PATH"
+
 # Define o editor padrão
 export EDITOR='nano'
 
@@ -21,6 +24,13 @@ export PATH="/c/Windows/System32/OpenSSH:$PATH"
 # Enables Fast Node Manager (fnm)
 eval "$(fnm env --use-on-cd --shell bash)"
 
+{{ if (or .system.is_linux .system.is_wsl) -}}
+# Setup `pyenv` for Python version management
+export PYENV_ROOT="$XDG_DATA_HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - bash)"
+{{- end }}
+
 # Define o comportamento do comando less
 ## -R: melhor exibição de caracteres de controle
 ## -M: prompt longo, com nome do arquivo e informações da quantidade de linhas
@@ -37,8 +47,17 @@ eval "$(fnm env --use-on-cd --shell bash)"
 ### -DRc: rscroll character cyano
 export LESS='-RMnS~#3i -+F -+X --use-color -DNk -DPkc -DRkc'
 
+export LESSOPEN='| pygmentize -g -O style=github-dark %s'
+
 # Define o charset utilizado
 export LESSCHARSET='utf-8'
 
 # Desabilita o histórico do less
 export LESSHISTFILE=-
+
+# Define local para configurações do `bat`
+export BAT_CONFIG_DIR="$XDG_CONFIG_HOME/bat"
+
+# Define variáveis para o `pipx`
+export PIPX_HOME="$XDG_DATA_HOME/pipx"
+export PIPX_BIN_DIR="$XDG_BIN_HOME"
