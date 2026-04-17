@@ -6,6 +6,7 @@ packages:
     - git-delta
     - git-lfs
     - curl
+    - unzip
     - console-setup
     - qemu-guest-agent
     - make

@@ -4,6 +4,10 @@
 set -e
 
 echo "[chezmoi] Sistema operacional detectado: Linux"
+
+echo "[chezmoi] Carregando ambiente dotfile"
+source "$HOME/.profile"
+
 echo "[chezmoi] Iniciando instalação declarativa..."
 
 sudo="sudo"
