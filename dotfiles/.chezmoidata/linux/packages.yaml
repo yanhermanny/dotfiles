@@ -27,7 +27,6 @@ packages:
     - liblzma-dev
     - bat
   curl:
-    - https://fnm.vercel.app/install
     - https://pyenv.run
   pip:
     - pipx

@@ -91,10 +91,13 @@ install_curl_package "{{ . }}"
 # =====================================================================================
 # 3) Instalar Python mais recente via pyenv
 # =====================================================================================
+echo "[chezmoi] Verificando instalação do Python via pyenv..."
 if ! pyenv versions --bare | grep -E '^3.' >/dev/null; then
+  echo "[pyenv] Python 3 não encontrado. Instalando a versão mais recente do Python 3..."
   pyenv install 3
   pyenv global 3
 fi
+echo "[pyenv] Python instalado: $(python --version 2>&1)"
 
 # 3.1) Instalar pacotes pip declarados
 # ====================================================================================
