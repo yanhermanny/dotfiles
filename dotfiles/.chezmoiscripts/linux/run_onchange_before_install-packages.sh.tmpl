@@ -1,0 +1,209 @@
+{{- if (or .system.is_linux .system.is_wsl) -}}
+chezmoi:template:missing-key=invalid
+#!/bin/bash
+
+set -e
+
+echo "[chezmoi] Sistema operacional detectado: Linux"
+echo "[chezmoi] Iniciando instalação declarativa..."
+
+sudo="sudo"
+{{ if eq .chezmoi.username "root" -}}
+$sudo=""
+{{ end -}}
+
+echo -e "\n[apt] Atualizando pacotes já instalados..."
+$sudo apt update && $sudo apt upgrade -y
+
+# -------------------------------------------------------------------------------------
+# Helper: verifica pacote instalado via apt
+verify_apt_package() {
+  local name="$1"
+  if dpkg -s "$name" &>/dev/null; then
+    echo "[apt] Ignorando: $name já está instalado."
+    return 0
+  else
+    return 1
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes via apt
+install_apt_package() {
+  local name="$1"
+  echo "[apt] Instalando $name..."
+  $sudo apt install -y "$name"
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: verifica pacote instalado via curl
+verify_curl_package() {
+  local name="$1"
+  if command -v "$name" &>/dev/null; then
+    echo "[curl] Ignorando: $name já está instalado."
+    return 0
+  else
+    return 1
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes via curl
+install_curl_package() {
+  local name="$1"
+  local url="$2"
+  echo "[curl] Instalando $name..."
+  curl -fsSL "$url" | bash
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: verifica pacote instalado via pip
+verify_pip_package() {
+  local name="$1"
+  if pip show "$name" &>/dev/null; then
+    echo "[pip] Ignorando: $name já está instalado."
+    return 0
+  else
+    return 1
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes pip
+install_pip_package() {
+  local name="$1"
+  echo "[pip] Instalando $name..."
+  pip install --upgrade --upgrade-strategy eager "$name"
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: verifica pacote instalado via pipx
+verify_pipx_package() {
+  local name="$1"
+  if pipx list | grep -q "$name"; then
+    echo "[pipx] Ignorando: $name já está instalado."
+    return 0
+  else
+    return 1
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: instala pacotes pipx
+install_pipx_package() {
+  local name="$1"
+  echo "[pipx] Instalando $name..."
+  pipx install "$name"
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: Função genérica para executar hooks (lista de comandos)
+run_hook_command() {
+  local command="$1"
+  echo "[hook] Executando: $command"
+  eval "$command"
+}
+# -------------------------------------------------------------------------------------
+
+{{ with .packages.apt -}}
+# =====================================================================================
+# Instalar pacotes via apt
+# =====================================================================================
+echo -e "\n[chezmoi] Instalando pacotes via apt..."
+{{- range . }}
+if ! verify_apt_package "{{ .name }}"; then
+  {{- with .pre_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+  install_apt_package "{{ .name }}"
+  {{- with .post_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+fi
+{{- end }}
+# -------------------------------------------------------------------------------------
+{{- end }}
+
+{{ with .packages.curl -}}
+# =====================================================================================
+# Instalar pacotes via curl
+# =====================================================================================
+echo -e "\n[chezmoi] Instalando pacotes via curl..."
+{{- range . }}
+if ! verify_curl_package "{{ .name }}"; then
+  {{- with .pre_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+  install_curl_package "{{ .name }}" "{{ .url }}"
+  {{- with .post_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+fi
+{{- end }}
+# -------------------------------------------------------------------------------------
+{{- end }}
+
+{{ with .packages.pip -}}
+# =====================================================================================
+# Instalar pacotes via pip
+# =====================================================================================
+echo -e "\n[chezmoi] Instalando pacotes pip declarados..."
+{{- range . }}
+if ! verify_pip_package "{{ .name }}"; then
+  {{- with .pre_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+  install_pip_package "{{ .name }}"
+  {{- with .post_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+fi
+{{- end }}
+# -------------------------------------------------------------------------------------
+{{- end }}
+
+{{ with .packages.pipx -}}
+# =====================================================================================
+# Instalar pacotes via pipx
+# =====================================================================================
+echo -e "\n[chezmoi] Instalando pacotes pipx declarados..."
+{{- range . }}
+if ! verify_pipx_package "{{ .name }}"; then
+  {{- with .pre_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+  install_pipx_package "{{ .name }}"
+  {{- with .post_install }}
+  {{- range . }}
+  run_hook_command '{{ . }}'
+  {{- end }}
+  {{- end }}
+fi
+{{- end }}
+# -------------------------------------------------------------------------------------
+{{- end }}
+
+echo -e "\n[chezmoi] Instalação concluída com sucesso!"
+{{- end }}

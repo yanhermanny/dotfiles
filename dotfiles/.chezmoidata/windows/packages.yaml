@@ -1,15 +1,15 @@
 packages:
   winget:
-    - Python.PythonInstallManager
-    - Git.Git
-    - Microsoft.PowerShell
-    - Schniz.fnm
-    - dandavison.delta
-    - 7zip.7zip
-    - ShareX.ShareX
-    - GitHub.cli
-    - Microsoft.PowerToys
-    - sharkdp.bat
+    - name: Python.PythonInstallManager
+    - name: Git.Git
+    - name: Microsoft.PowerShell
+    - name: Schniz.fnm
+    - name: dandavison.delta
+    - name: 7zip.7zip
+    - name: ShareX.ShareX
+    - name: GitHub.cli
+    - name: Microsoft.PowerToys
+    - name: sharkdp.bat
   pip:
-    - pipx
-  pipx:
+    - name: pipx
+  pipx: []

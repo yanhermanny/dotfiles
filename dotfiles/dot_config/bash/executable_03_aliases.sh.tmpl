@@ -45,7 +45,7 @@ cat() {
   echo "`/bin/cat $@`"
 }
 
-{{ if .system.is_windows -}}
+{{- if .system.is_windows }}
 # Uses tree command from Windows
 alias tree="tree.com //A"
 
