@@ -41,9 +41,7 @@ alias cd..='cd ../'
 alias ..='cd ../'
 
 # Put prompt to new line when cat file without trailing line
-cat() {
-  echo "`/bin/cat $@`"
-}
+alias cat='bat --paging=never'
 
 {{- if .system.is_windows }}
 # Uses tree command from Windows

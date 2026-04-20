@@ -113,6 +113,38 @@ run_hook_command() {
 }
 # -------------------------------------------------------------------------------------
 
+# -------------------------------------------------------------------------------------
+# Helper: verifica se o link simbólico existe e aponta para o destino correto
+verify_symbolic_link() {
+  local name="$1"
+  local target="$2"
+  if [ -L "$name" ]; then
+    if [ "$(readlink -f "$name")" = "$target" ]; then
+      echo "[symlink] Ignorando: link simbólico $name já existe e aponta para $target."
+      return 0
+    else
+      echo "[symlink] Warning: Link simbólico $name existe, mas aponta para $(readlink -f "$name") em vez de $target."
+      echo "[symlink] Removendo link simbólico incorreto $name..."
+      rm -f "$name"
+      return 1
+    fi
+  else
+    echo "[symlink] Link simbólico $name não existe."
+    return 1
+  fi
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: cria link simbólico
+create_symbolic_link() {
+  local name="$1"
+  local target="$2"
+  echo "[symlink] Criando link simbólico: $name -> $target"
+  ln -sf "$target" "$name"
+}
+# -------------------------------------------------------------------------------------
+
 {{ with .packages.apt -}}
 # =====================================================================================
 # Instalar pacotes via apt
@@ -200,6 +232,19 @@ if ! verify_pipx_package "{{ .name }}"; then
   run_hook_command '{{ . }}'
   {{- end }}
   {{- end }}
+fi
+{{- end }}
+# -------------------------------------------------------------------------------------
+{{- end }}
+
+{{ with .packages.symbolic_link -}}
+# =====================================================================================
+# Criar links simbólicos
+# =====================================================================================
+echo -e "\n[chezmoi] Criando links simbólicos declarados..."
+{{- range . }}
+if ! verify_symbolic_link "{{ .name }}" "{{ .target }}"; then
+  create_symbolic_link "{{ .name }}" "{{ .target }}"
 fi
 {{- end }}
 # -------------------------------------------------------------------------------------

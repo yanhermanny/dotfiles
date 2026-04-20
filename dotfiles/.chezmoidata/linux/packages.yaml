@@ -40,3 +40,6 @@ packages:
   pip:
     - name: pipx
   pipx: []
+  symbolic_link:
+    - name: ~/.local/bin/bat
+      target: /usr/bin/batcat
