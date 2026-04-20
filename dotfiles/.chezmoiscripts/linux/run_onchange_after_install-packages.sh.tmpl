@@ -250,5 +250,8 @@ fi
 # -------------------------------------------------------------------------------------
 {{- end }}
 
+echo -e "\n[chezmoi] Recarregando shell para aplicar mudanças..."
+exec "$SHELL" -l
+
 echo -e "\n[chezmoi] Instalação concluída com sucesso!"
 {{- end }}
