@@ -1,188 +1,229 @@
 {{- if .system.is_windows -}}
+chezmoi:template:missing-key=invalid
 Write-Host "[chezmoi] Sistema operacional detectado: Windows" -ForegroundColor Cyan
 Write-Host "[chezmoi] Iniciando instalação declarativa..." -ForegroundColor Cyan
 
 # -------------------------------------------------------------------------------------
-# Helper: verifica se pacote winget já está instalado
+# Helper: executa comandos (hooks)
+function Invoke-Hook {
+  param([string]$Command)
+
+  Write-Host "[hook] Executando: $Command" -ForegroundColor DarkGray
+  Invoke-Expression $Command
+}
 # -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: verifica se pacote winget já está instalado
 function Test-WingetInstalled {
   param([string]$Id)
 
   $pkg = winget list --exact --id $Id --source winget 2>$null
-  return ($pkg -match $Id)
+  if ($pkg -match $Id) {
+    Write-Host "[winget] Ignorando: $Id já está instalado" -ForegroundColor DarkGray
+    return $true
+  }
+  return $false
 }
 # -------------------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------------------
 # Helper: instala pacote via winget
-# -------------------------------------------------------------------------------------
 function Install-WingetPackage {
   param([string]$Id)
 
-  if (Test-WingetInstalled $Id) {
-    Write-Host "[winget] Ignorando: $Id já está instalado" -ForegroundColor DarkGray
-    return
-  }
-
   Write-Host "[winget] Instalando $Id..." -ForegroundColor Yellow
   winget install --exact --id $Id --accept-package-agreements --accept-source-agreements --source winget
+}
+# -------------------------------------------------------------------------------------
 
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host "[ERROR] winget falhou ao instalar $Id (exit code $LASTEXITCODE)" -ForegroundColor Red
+# -------------------------------------------------------------------------------------
+# Helper: verifica se pacote Invoke-WebRequest já está instalado
+function Test-WebRequestInstalled {
+  param([string]$Name)
+
+  if (Test-Command $Name) {
+    Write-Host "[iwr] Ignorando: $Name já está instalado" -ForegroundColor DarkGray
+    return $true
   }
+  return $false
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: instala pacote via Invoke-WebRequest
+function Install-WebRequestPackage {
+  param([string]$Name, [string]$Url, [string]$OutFile)
+
+  Write-Host "[iwr] Instalando $Name..." -ForegroundColor Yellow
+  Invoke-WebRequest $Url -OutFile $OutFile
+  powershell -ExecutionPolicy Bypass -File $OutFile
+  Remove-Item $OutFile -ErrorAction SilentlyContinue
 }
 # -------------------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------------------
 # Helper: verifica se pacote pip já está instalado
-# -------------------------------------------------------------------------------------
 function Test-PipInstalled {
   param([string]$Package)
 
-  $pkg = & $script:PyManager exec -m pip show $Package 2>$null
-  return ($pkg -match $Package)
-}
-# -------------------------------------------------------------------------------------
-
-# -------------------------------------------------------------------------------------
-# Helper: verifica se pacote pipx já está instalado
-# -------------------------------------------------------------------------------------
-function Test-PipxInstalled {
-  param([string]$Package)
-
-  $pkg = & $script:PyManager exec -m pipx list 2>$null | Select-String $Package -Quiet
-  return $pkg
+  $pkg = pip show $Package 2>$null
+  if ($pkg -match $Package) {
+    Write-Host "[pip] Ignorando: $Package já está instalado" -ForegroundColor DarkGray
+    return $true
+  }
+  return $false
 }
 # -------------------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------------------
 # Helper: instala pacote pip
-# -------------------------------------------------------------------------------------
 function Install-PipPackage {
   param([string]$Package)
 
-  if (-not $script:PyManager) {
-    Write-Host "[pip] PyManager indisponível. Pacote não instalado: $Package" -ForegroundColor Red
-    return
-  }
-  if (Test-PipInstalled $Package) {
-    Write-Host "[pip] Ignorando: $Package já está instalado" -ForegroundColor DarkGray
-    return
-  }
-
   Write-Host "[pip] Instalando $Package..." -ForegroundColor Yellow
-  & $script:PyManager exec -m pip install --upgrade --upgrade-strategy eager $Package
+  pip install --upgrade --upgrade-strategy eager $Package
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: verifica se pacote pipx já está instalado
+function Test-PipxInstalled {
+  param([string]$Package)
+
+  if (pipx list 2>$null | Select-String $Package -Quiet) {
+    Write-Host "[pipx] Ignorando: $Package já está instalado" -ForegroundColor DarkGray
+    return $true
+  }
+  return $false
 }
 # -------------------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------------------
 # Helper: instala pacote pipx
-# -------------------------------------------------------------------------------------
 function Install-PipxPackage {
   param([string]$Package)
 
-  if (-not $script:PyManager) {
-    Write-Host "[pipx] PyManager indisponível. Pacote não instalado: $Package" -ForegroundColor Red
-    return
-  }
-  if (Test-PipxInstalled $Package) {
-    Write-Host "[pipx] Ignorando: $Package já está instalado" -ForegroundColor DarkGray
-    return
-  }
-
   Write-Host "[pipx] Instalando $Package..." -ForegroundColor Yellow
-  & $script:PyManager exec -m pipx install $Package
+  pipx install $Package
+}
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# Helper: verifica comando disponível
+function Test-Command {
+  param([string]$Cmd)
+
+  return (Get-Command $Cmd -ErrorAction SilentlyContinue)
 }
 # -------------------------------------------------------------------------------------
 
 # =====================================================================================
-# 1) Habilitar winget
+# Habilitar winget
 # =====================================================================================
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+if (-not (Test-Command "winget")) {
   Write-Host "[chezmoi] Habilitando winget..." -ForegroundColor Cyan
   Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
 }
 # -------------------------------------------------------------------------------------
 
+Write-Host "`n[chezmoi] Atualizando pacotes via winget..." -ForegroundColor Green
+winget upgrade --all --accept-package-agreements --accept-source-agreements --source winget
+
+{{ with .packages.windows -}}
+{{ with .winget -}}
 # =====================================================================================
-# 2) Instalar pacotes winget
+# Instalar pacotes via winget
 # =====================================================================================
 Write-Host "`n[chezmoi] Instalando pacotes via winget..." -ForegroundColor Green
-{{ range .packages.winget }}
-Install-WingetPackage "{{ . }}"
+
+{{- range . }}
+if (-not (Test-WingetInstalled "{{ .name }}")) {
+  {{- with .pre_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
+  {{- end }}
+  {{- end }}
+  Install-WingetPackage "{{ .name }}"
+  {{- with .post_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
+  {{- end }}
+  {{- end }}
+}
 {{- end }}
 # -------------------------------------------------------------------------------------
+{{- end }}
 
+{{ with .invoke_web_request -}}
 # =====================================================================================
-# 3) Instalar Python mais recente via Python Install Manager (PIM)
+# Instalar via Invoke-WebRequest
 # =====================================================================================
-Write-Host "`n[chezmoi] Verificando se Python Install Manager (pymanager) está instalado..." -ForegroundColor Green
-$PyManager = "pymanager"
-if (-not (Get-Command $PyManager -ErrorAction SilentlyContinue)) {
-  Write-Host "[chezmoi] Python Install Manager não encontrado via PATH. Buscando no local de instalação..." -ForegroundColor Yellow
-  $PyManager = Join-Path $env:ProgramFiles "PyManager\pymanager.exe"
-
-  if (-not (Test-Path $PyManager)) {
-    Write-Host "[ERROR] Python Install Manager não encontrado em $PyManager. Pulando instalação do Python e pacotes pip" -ForegroundColor Red
-    $PyManager = $null
-  }
-}
-
-if ($PyManager) {
-  Write-Host "[chezmoi] Comando PyManager definido: $PyManager" -ForegroundColor Cyan
-  $PythonInstalled = & $PyManager list | Select-String "Python" -Quiet
-  if ($PythonInstalled) {
-    Write-Host "[chezmoi] Ignorando: Python já está instalado" -ForegroundColor DarkGray
-  } else {
-    Write-Host "`n[chezmoi] Instalando Python mais recente via Python Install Manager..." -ForegroundColor Green
-    & $PyManager install default --update
-  }
-
-  # =====================================================================================
-  # 3.1) Instalar pacotes pip declarados
-  # =====================================================================================
-  Write-Host "`n[chezmoi] Instalando pacotes pip declarados..." -ForegroundColor Green
-  {{ range .packages.pip }}
-  Install-PipPackage "{{ . }}"
+Write-Host "`n[chezmoi] Instalando pacotes via Invoke-WebRequest..." -ForegroundColor Green
+{{- range . }}
+if (-not (Test-WebRequestInstalled "{{ .name }}")) {
+  {{- with .pre_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
   {{- end }}
-
-  # =====================================================================================
-  # 3.2) Instalar pacotes pipx declarados
-  # =====================================================================================
-  Write-Host "`n[chezmoi] Instalando pacotes pipx declarados..." -ForegroundColor Green
-  {{ range .packages.pipx }}
-  Install-PipxPackage "{{ . }}"
+  {{- end }}
+  Write-Host "[iwr] Instalando {{ .name }}..." -ForegroundColor Yellow
+  Install-WebRequestPackage "{{ .name }}" "{{ .url }}" "{{ .out_file }}"
+  {{- with .post_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
+  {{- end }}
   {{- end }}
 }
+{{- end }}
 # -------------------------------------------------------------------------------------
+{{- end }}
 
+{{ with .pip -}}
 # =====================================================================================
-# 4) Instalar Node LTS via fnm
+# Instalar pacotes pip
 # =====================================================================================
-Write-Host "`n[chezmoi] Verificando se fnm está instalado..." -ForegroundColor Green
-$FNM = "fnm"
-if (-not (Get-Command $FNM -ErrorAction SilentlyContinue)) {
-  Write-Host "[chezmoi] fnm não encontrado via PATH. Buscando no local de instalação..." -ForegroundColor Yellow
-  $FNM = Join-Path $env:LocalAppData "Microsoft\WinGet\Links\fnm.exe"
-
-  if (-not (Test-Path $FNM)) {
-    Write-Host "[ERROR] fnm não encontrado em $FNM. Pulando instalação do Node LTS" -ForegroundColor Red
-    $FNM = $null
-  }
+Write-Host "`n[chezmoi] Instalando pacotes pip..." -ForegroundColor Green
+{{- range . }}
+if (-not (Test-PipInstalled "{{ .name }}")) {
+  {{- with .pre_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
+  {{- end }}
+  {{- end }}
+  Install-PipPackage "{{ .name }}"
+  {{- with .post_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
+  {{- end }}
+  {{- end }}
 }
-
-if ($FNM) {
-  Write-Host "[chezmoi] Comando fnm definido: $FNM" -ForegroundColor Cyan
-  $NodeInstalled = & $FNM list | Select-String "default" -Quiet
-  if ($NodeInstalled) {
-    Write-Host "[chezmoi] Ignorando: Node já está instalado" -ForegroundColor DarkGray
-  } else {
-    Write-Host "`n[chezmoi] Instalando Node LTS via fnm..." -ForegroundColor Green
-    & $FNM install --lts
-    & $FNM default lts-latest
-  }
-}
+{{- end }}
 # -------------------------------------------------------------------------------------
+{{- end }}
 
+{{ with .pipx -}}
+# =====================================================================================
+# Instalar pacotes pipx
+# =====================================================================================
+Write-Host "`n[chezmoi] Instalando pacotes pipx..." -ForegroundColor Green
+{{- range . }}
+if (-not (Test-PipxInstalled "{{ .name }}")) {
+  {{- with .pre_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
+  {{- end }}
+  {{- end }}
+  Install-PipxPackage "{{ .name }}"
+  {{- with .post_install }}
+  {{- range . }}
+  Invoke-Hook '{{ . }}'
+  {{- end }}
+  {{- end }}
+}
+{{- end }}
+# -------------------------------------------------------------------------------------
+{{- end }}
+{{- end }}
 Write-Host "`n[chezmoi] Instalação concluída com sucesso!" -ForegroundColor Cyan
 {{- end }}

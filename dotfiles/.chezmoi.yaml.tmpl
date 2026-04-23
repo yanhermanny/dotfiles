@@ -13,6 +13,10 @@ sourceDir: "{{ .chezmoi.homeDir }}/.local/share/chezmoi"
 # Diretório de destino dos arquivos aplicados
 destDir: "{{ .chezmoi.homeDir }}"
 
+cd:
+  command: {{ if $isWindows }}pwsh{{ else }}bash{{ end }}
+  {{ if $isWindows }}args: -NoLogo{{ end }}
+
 # Modo padrão
 mode: file
 
