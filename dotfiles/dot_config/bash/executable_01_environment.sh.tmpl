@@ -4,24 +4,97 @@
 # Configurações do ambiente de shell
 # --------------------------------------------------------------------------------
 
+{{- if .system.is_windows }}
+
+# -------------------------------------------------------------------------------------
+# Helper: converte caminho do Windows para Unix
+_win_to_unix_path() {
+  local input="$1"
+
+  local expanded="$input"
+  while [[ "$expanded" =~ %([^%]+)% ]]; do
+    local var="${BASH_REMATCH[1]}"
+    local value="${!var}"
+
+    if [[ -z "$value" ]]; then
+      value="$(cmd.exe /C "echo %$var%" 2>/dev/null | tr -d '\r')"
+    fi
+
+    expanded="${expanded//%$var%/$value}"
+  done
+
+  if [[ "$expanded" =~ ^[a-zA-Z]:[\\/]|^\\\\ ]]; then
+    local path="${expanded//\\//}"
+
+    if [[ "$path" =~ ^([a-zA-Z]):/(.*) ]]; then
+      local drive="${BASH_REMATCH[1],,}"  # lowercase
+      local rest="${BASH_REMATCH[2]}"
+      echo "/$drive/$rest"
+      return
+    fi
+
+    if [[ "$path" =~ ^//([^/]+)/(.*) ]]; then
+      local server="${BASH_REMATCH[1]}"
+      local rest="${BASH_REMATCH[2]}"
+      echo "/unc/$server/$rest"
+      return
+    fi
+
+    echo "$path"
+    return
+  fi
+
+  echo "$input"
+}
+# -------------------------------------------------------------------------------------
+
 # -------------------------------------------------------------------------------------
 # Helper: adiciona caminho ao PATH
-{{ if .system.is_windows -}}
 _add_to_path() {
-  local dir="$1"
-  if [[ -d "$dir" && ":$PATH:" != *":$dir:"* ]]; then
-    psenv add-path "$dir"
-  fi
+  local input="$1"
+  local new
+  new="$(_win_to_unix_path "$input")"
+
+  new="$(realpath -m "$new" 2>/dev/null || echo "$new")"
+
+  local IFS=':'
+  local -a parts=($PATH)
+  local -a filtered=()
+
+  for p in "${parts[@]}"; do
+    [[ -z "$p" ]] && continue
+
+    local p_unix
+    p_unix="$(_win_to_unix_path "$p")"
+
+    local resolved
+    resolved="$(realpath -m "$p_unix" 2>/dev/null || echo "$p_unix")"
+
+    if [[ "$resolved" != "$new" ]]; then
+      filtered+=("$p_unix")
+    fi
+  done
+
+  PATH="$new"
+  for p in "${filtered[@]}"; do
+    PATH="$PATH:$p"
+  done
+
+  export PATH
 }
-{{ else -}}
-_add_to_path() {
-  local dir="$1"
-  if [[ -d "$dir" && ":$PATH:" != *":$dir:"* ]]; then
-    export PATH="$PATH:$dir"
-  fi
-}
-{{ end -}}
 # -------------------------------------------------------------------------------------
+{{- else }}
+
+# -------------------------------------------------------------------------------------
+# Helper: adiciona caminho ao PATH
+_add_to_path() {
+  local dir="$1"
+  if [[ -d "$dir" && ":$PATH:" != *":$dir:"* ]]; then
+    export PATH="$dir:$PATH"
+  fi
+}
+# -------------------------------------------------------------------------------------
+{{- end }}
 
 # Adiciona o diretório de binários do usuário ao PATH
 _add_to_path "$XDG_BIN_HOME"
@@ -49,18 +122,32 @@ if command -v fnm > /dev/null 2>&1; then
   eval "$(fnm env --use-on-cd --shell bash)"
 fi
 
-{{- if not .system.is_windows }}
-
 # Setup `pyenv` for Python version management
+{{- if .system.is_windows }}
+export PYENV_ROOT="$(_win_to_unix_path "${PYENV_ROOT:-$XDG_DATA_HOME/pyenv/pyenv-win}")"
+export PYENV="$PYENV_ROOT"
+export PYENV_HOME="$PYENV_ROOT"
+[[ -d $PYENV_ROOT/bin ]] && _add_to_path "$PYENV_ROOT/bin"
+[[ -d $PYENV_ROOT/shims ]] && _add_to_path "$PYENV_ROOT/shims"
+{{- else }}
 export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
 [[ -d $PYENV_ROOT/bin ]] && _add_to_path "$PYENV_ROOT/bin"
 eval "$(pyenv init - bash)"
+{{- end }}
 
 # Define variáveis para o `pipx`
+{{- if .system.is_windows }}
+export PIPX_HOME="$(_win_to_unix_path "${PIPX_HOME:-$XDG_DATA_HOME/pipx}")"
+export PIPX_BIN_DIR="$(_win_to_unix_path "${PIPX_BIN_DIR:-$XDG_BIN_HOME}")"
+{{- else }}
 export PIPX_HOME="$XDG_DATA_HOME/pipx"
 export PIPX_BIN_DIR="$XDG_BIN_HOME"
+{{- end }}
 
 # Define local para configurações do `bat`
+{{- if .system.is_windows }}
+export BAT_CONFIG_DIR="$(_win_to_unix_path "${BAT_CONFIG_DIR:-$XDG_CONFIG_HOME/bat}")"
+{{- else }}
 export BAT_CONFIG_DIR="$XDG_CONFIG_HOME/bat"
 {{- end }}
 
@@ -86,4 +173,7 @@ export LESSCHARSET='utf-8'
 # Desabilita o histórico do less
 export LESSHISTFILE=-
 
+{{ if .system.is_windows -}}
+unset -f _win_to_unix_path
+{{- end }}
 unset -f _add_to_path

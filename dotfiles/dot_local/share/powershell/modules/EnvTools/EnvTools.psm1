@@ -1,3 +1,40 @@
+function Convert-UnixToWindowsPath {
+    param([string]$Path)
+
+    if (-not $Path) { return $Path }
+
+    # /c/Users/... (Git Bash)
+    if ($Path -match '^/([a-zA-Z])/(.*)') {
+        $drive = $matches[1].ToUpper()
+        $rest = $matches[2] -replace '/', '\'
+        return "$drive`:\$rest"
+    }
+
+    # /mnt/c/... (WSL)
+    if ($Path -match '^/mnt/([a-zA-Z])/(.*)') {
+        $drive = $matches[1].ToUpper()
+        $rest = $matches[2] -replace '/', '\'
+        return "$drive`:\$rest"
+    }
+
+    # fallback (só troca slash)
+    return ($Path -replace '/', '\')
+}
+
+function Convert-WindowsToUnixPath {
+    param([string]$Path)
+
+    if (-not $Path) { return $Path }
+
+    if ($Path -match '^([a-zA-Z]):\\(.*)') {
+        $drive = $matches[1].ToLower()
+        $rest = $matches[2] -replace '\\', '/'
+        return "/$drive/$rest"
+    }
+
+    return ($Path -replace '\\', '/')
+}
+
 function Set-EnvVar {
     param(
         [Parameter(Mandatory)]
@@ -7,8 +44,14 @@ function Set-EnvVar {
         [string]$Value,
 
         [ValidateSet("String", "ExpandString")]
-        [string]$Type = "String"
+        [string]$Type = "String",
+
+        [switch]$UnixPath
     )
+
+    if ($UnixPath) {
+        $Value = Convert-UnixToWindowsPath $Value
+    }
 
     $regPath = "HKCU:\Environment"
 
@@ -37,13 +80,21 @@ function Remove-EnvVar {
 function Get-EnvVar {
     param(
         [Parameter(Mandatory)]
-        [string]$Name
+        [string]$Name,
+
+        [switch]$UnixPath
     )
 
     $regPath = "HKCU:\Environment"
     $item = Get-ItemProperty -Path $regPath -Name $Name -ErrorAction SilentlyContinue
 
-    return $item.$Name
+    $value = $item.$Name
+
+    if ($UnixPath) {
+        $value = Convert-WindowsToUnixPath $value
+    }
+
+    return $value
 }
 
 function Get-EnvVars {
@@ -73,8 +124,14 @@ function Sync-SessionPath {
 function Add-EnvPath {
     param(
         [Parameter(Mandatory)]
-        [string]$Value
+        [string]$Value,
+
+        [switch]$UnixPath
     )
+
+    if ($UnixPath) {
+        $Value = Convert-UnixToWindowsPath $Value
+    }
 
     $regPath = "HKCU:\Environment"
 
@@ -84,7 +141,7 @@ function Add-EnvPath {
     $normalized = $entries | ForEach-Object { Resolve-PathEntry $_ }
 
     if ($normalized -notcontains (Resolve-PathEntry $Value)) {
-        $entries += $Value
+        $entries = @($Value) + $entries
     }
 
     $newPath = ($entries | Where-Object { $_ }) -join ';'
@@ -102,8 +159,51 @@ function Add-EnvPath {
 function Remove-EnvPath {
     param(
         [Parameter(Mandatory)]
-        [string]$Value
+        [string]$Value,
+
+        [switch]$UnixPath
     )
+
+    if ($UnixPath) {
+        $Value = Convert-UnixToWindowsPath $Value
+    }
+
+    $regPath = "HKCU:\Environment"
+
+    $current = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+    if (-not $current) { return }
+
+    $entries = $current -split ';'
+
+    $target = Resolve-PathEntry $Value
+
+    $filtered = $entries | Where-Object {
+        (Resolve-PathEntry $_) -ne $target
+    }
+
+    $newPath = ($filtered | Where-Object { $_ }) -join ';'
+
+    New-ItemProperty `
+        -Path $regPath `
+        -Name "PATH" `
+        -Value $newPath `
+        -PropertyType "ExpandString" `
+        -Force | Out-Null
+
+    Sync-SessionPath
+}
+
+function Remove-EnvPath {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Value,
+
+        [switch]$UnixPath
+    )
+
+    if ($UnixPath) {
+        $Value = Convert-UnixToWindowsPath $Value
+    }
 
     $regPath = "HKCU:\Environment"
 

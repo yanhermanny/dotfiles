@@ -10,7 +10,9 @@ param(
     [string]$Value,
 
     [ValidateSet("String", "ExpandString")]
-    [string]$Type = "String"
+    [string]$Type = "String",
+
+    [switch]$UnixPath
 )
 
 if (-not (Get-Module EnvTools)) {
@@ -21,9 +23,9 @@ switch ($Command) {
 
     "set" {
         if (-not $Name -or -not $Value) {
-            throw "Uso: env set <NAME> <VALUE> [-Type String|ExpandString]"
+            throw "Uso: env set <NAME> <VALUE> [-Type String|ExpandString] [-UnixPath]"
         }
-        Set-EnvVar -Name $Name -Value $Value -Type $Type
+        Set-EnvVar -Name $Name -Value $Value -Type $Type -UnixPath:$UnixPath
     }
 
     "remove" {
@@ -35,9 +37,9 @@ switch ($Command) {
 
     "get" {
         if (-not $Name) {
-            throw "Uso: env get <NAME>"
+            throw "Uso: env get <NAME> [-UnixPath]"
         }
-        Get-EnvVar -Name $Name
+        Get-EnvVar -Name $Name -UnixPath:$UnixPath
     }
 
     "list" {
@@ -46,27 +48,27 @@ switch ($Command) {
 
     "add-path" {
         if (-not $Name) {
-            throw "Uso: env add-path <PATH>"
+            throw "Uso: env add-path <PATH> [-UnixPath]"
         }
-        Add-EnvPath -Value $Name
+        Add-EnvPath -Value $Name -UnixPath:$UnixPath
     }
 
     "remove-path" {
         if (-not $Name) {
-            throw "Uso: env remove-path <PATH>"
+            throw "Uso: env remove-path <PATH> [-UnixPath]"
         }
-        Remove-EnvPath -Value $Name
+        Remove-EnvPath -Value $Name -UnixPath:$UnixPath
     }
 
     default {
         Write-Host @"
 Comandos disponíveis:
-  psenv set <NAME> <VALUE> [-Type String|ExpandString]
+  psenv set <NAME> <VALUE> [-Type String|ExpandString] [-UnixPath]
   psenv remove <NAME>
-  psenv get <NAME>
+  psenv get <NAME> [-UnixPath]
   psenv list
-  psenv add-path <PATH>
-  psenv remove-path <PATH>
+  psenv add-path <PATH> [-UnixPath]
+  psenv remove-path <PATH> [-UnixPath]
 "@
     }
 }
