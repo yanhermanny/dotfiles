@@ -4,12 +4,20 @@
   signingkey = ~/.ssh/keys/id_ed25519_github.pub
 [core]
   editor = nano
-  autocrlf = true
+  autocrlf = {{if .system.is_windows }}true{{ else }}input{{ end }}
   pager = delta
+  ignorecase = {{if .system.is_windows }}true{{ else }}false{{ end }}
+  {{- if .system.is_windows }}
+  longpaths = true
+  {{- end }}
+  symlinks = {{ if .system.is_windows }}false{{ else }}true{{ end }}
 [credential]
-  helper = manager
+  helper = {{ if .system.is_windows }}manager{{ else if .system.is_wsl }}"/mnt/c/Program Files/Git/mingw64/bin/git-credential-manager.exe"{{ else if .system.is_linux }}cache --timeout 900{{ end }}
 [init]
   defaultBranch = main
+[color]
+  ui = auto
+  interactive = true
 [pull]
   rebase = false
 [push]
@@ -17,9 +25,16 @@
 [gpg]
   format = ssh
 [commit]
-  cleanup = verbatim
+  cleanup = scissors
   gpgsign = true
 [tag]
   gpgsign = true
+[diff "astextplain"]
+  textconv = astextplain
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
 [include]
   path = ~/.config/delta/delta.gitconfig

@@ -13,4 +13,5 @@
 --style=header,header-filesize,grid,numbers,changes
 
 # Syntax mappings: map a certain filename pattern to a language.
---map-syntax ".ignore:Git Ignore"
+--map-syntax ".*ignore:Git Ignore"
+--map-syntax "**/git/config:INI"
