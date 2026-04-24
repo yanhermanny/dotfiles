@@ -7,6 +7,26 @@ set -e
 echo "[chezmoi] Sistema operacional detectado: Linux"
 echo "[chezmoi] Iniciando instalação declarativa..."
 
+{{ if .system.is_wsl -}}
+# =====================================================================================
+# Verificar se WSL está herdando PATH do Windows
+# =====================================================================================
+if echo "$PATH" | tr ':' '\n' | grep -qi '^/mnt/[a-z]/'; then
+  echo -e "\n[chezmoi] ❌ Execução interrompida para evitar conflitos."
+  echo "[chezmoi] ⚠️ Detectado PATH do Windows no WSL."
+  echo "[chezmoi] Isso pode causar conflitos de ferramentas (ex: pyenv, node, etc)."
+  echo "[chezmoi] Recomenda-se desabilitar a herança do PATH do Windows:"
+  echo "  1. Edite o arquivo /etc/wsl.conf (como root):"
+  echo "     [interop]"
+  echo "     appendWindowsPath=false"
+  echo "  2. Reinicie o WSL executando no Windows:"
+  echo "     wsl --shutdown"
+  echo -e "\n[chezmoi] Após isso, execute novamente o chezmoi."
+  exit 1
+fi
+# -------------------------------------------------------------------------------------
+
+{{ end -}}
 sudo="sudo"
 {{ if eq .chezmoi.username "root" -}}
 sudo=""
@@ -269,5 +289,5 @@ fi
 echo -e "\n[chezmoi] Recarregando shell para aplicar mudanças..."
 
 echo -e "\n[chezmoi] Instalação concluída com sucesso!"
-exec "$SHELL" -l
+echo "[chezmoi] Para aplicar as mudanças, recarregue seu shell ou execute: source ~/.bashrc"
 {{- end }}
