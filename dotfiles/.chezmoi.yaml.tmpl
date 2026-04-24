@@ -6,6 +6,10 @@
 {{- $isLinux := eq .chezmoi.os "linux" }}
 {{- $isWSL := and $isLinux (contains (lower .chezmoi.kernel.osrelease) "microsoft") }}
 {{- $isWorkMachine := eq .chezmoi.hostname "VDICOR1W53-44" }}
+{{- $xdgConfig := or (env "XDG_CONFIG_HOME") (joinPath .chezmoi.homeDir ".config") }}
+{{- $xdgBin := or (env "XDG_BIN_HOME") (joinPath .chezmoi.homeDir ".local" "bin") }}
+{{- $xdgData := or (env "XDG_DATA_HOME") (joinPath .chezmoi.homeDir ".local" "share") }}
+{{- $xdgState := or (env "XDG_STATE_HOME") (joinPath .chezmoi.homeDir ".local" "state") }}
 
 # Diretório-fonte dos dotfiles gerenciados pelo chezmoi
 sourceDir: "{{ .chezmoi.homeDir }}/.local/share/chezmoi"
@@ -46,3 +50,8 @@ data:
     is_linux: {{ $isLinux }}
     is_wsl: {{ $isWSL }}
     is_work_machine: {{ $isWorkMachine }}
+  env:
+    xdg_config_home: '{{ $xdgConfig }}'
+    xdg_bin_home: '{{ $xdgBin }}'
+    xdg_data_home: '{{ $xdgData }}'
+    xdg_state_home: '{{ $xdgState }}'

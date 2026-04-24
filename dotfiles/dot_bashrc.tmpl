@@ -9,10 +9,10 @@ case $- in
 esac
 
 # Define variáveis XDG se não estiverem definidas
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_BIN_HOME="$HOME/.local/bin"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_CONFIG_HOME="{{ .env.xdg_config_home }}"
+export XDG_BIN_HOME="{{ .env.xdg_bin_home }}"
+export XDG_DATA_HOME="{{ .env.xdg_data_home }}"
+export XDG_STATE_HOME="{{ .env.xdg_state_home }}"
 
 # Cria os diretórios XDG se não existirem
 mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
@@ -32,3 +32,5 @@ if [ -d "$BASH_CONFIG_DIR" ]; then
     # Limpa a variável do loop
     unset module
 fi
+
+unset BASH_CONFIG_DIR
