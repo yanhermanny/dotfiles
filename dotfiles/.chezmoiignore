@@ -2,6 +2,10 @@
 
 {{- if not .system.is_windows }}
 .chezmoiscripts/windows/**
+Documents/
+**/[pP]ower[sS]hell/
+.local/bin/psenv**
+.local/bin/WindowsEnvironmentVariablesLauncher.exe
 {{- end }}
 
 {{- if not (or .system.is_linux .system.is_wsl) }}

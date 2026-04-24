@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # ~/.config/bash/04_git_setup.sh
 # --------------------------------------------------------------------------------
 # Encontra e carrega a função __git_ps1

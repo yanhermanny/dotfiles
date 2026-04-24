@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+SCRIPT="$XDG_BIN_HOME/psenv.ps1"
+pwsh "$SCRIPT" "$@"

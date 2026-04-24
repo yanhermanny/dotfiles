@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # ~/.config/bash/02_input.sh
 # --------------------------------------------------------------------------------
 # Configurações de Entrada (Input, Readline e Autocomplete)
