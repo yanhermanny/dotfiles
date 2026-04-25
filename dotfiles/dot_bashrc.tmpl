@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/usr/bin/env sh
 # ~/.bashrc
 # --------------------------------------------------------------------------------
 #
@@ -8,14 +8,8 @@ case $- in
       *) return;;
 esac
 
-# Define variáveis XDG se não estiverem definidas
-export XDG_CONFIG_HOME="{{ .env.xdg_config_home }}"
-export XDG_BIN_HOME="{{ .env.xdg_bin_home }}"
-export XDG_DATA_HOME="{{ .env.xdg_data_home }}"
-export XDG_STATE_HOME="{{ .env.xdg_state_home }}"
-
-# Cria os diretórios XDG se não existirem
-mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+# Define XDG_CONFIG_HOME
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
 
 # Diretório base de configuração do Bash
 BASH_CONFIG_DIR="$XDG_CONFIG_HOME/bash"

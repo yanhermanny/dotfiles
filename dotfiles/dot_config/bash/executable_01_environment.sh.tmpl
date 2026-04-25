@@ -10,8 +10,9 @@
 # Helper: converte caminho do Windows para Unix
 _win_to_unix_path() {
   local input="$1"
-
   local expanded="$input"
+
+  # Expande variáveis de ambiente do Windows no formato %VAR%
   while [[ "$expanded" =~ %([^%]+)% ]]; do
     local var="${BASH_REMATCH[1]}"
     local value="${!var}"
@@ -23,28 +24,7 @@ _win_to_unix_path() {
     expanded="${expanded//%$var%/$value}"
   done
 
-  if [[ "$expanded" =~ ^[a-zA-Z]:[\\/]|^\\\\ ]]; then
-    local path="${expanded//\\//}"
-
-    if [[ "$path" =~ ^([a-zA-Z]):/(.*) ]]; then
-      local drive="${BASH_REMATCH[1],,}"  # lowercase
-      local rest="${BASH_REMATCH[2]}"
-      echo "/$drive/$rest"
-      return
-    fi
-
-    if [[ "$path" =~ ^//([^/]+)/(.*) ]]; then
-      local server="${BASH_REMATCH[1]}"
-      local rest="${BASH_REMATCH[2]}"
-      echo "/unc/$server/$rest"
-      return
-    fi
-
-    echo "$path"
-    return
-  fi
-
-  echo "$input"
+  cygpath -u "$expanded"
 }
 # -------------------------------------------------------------------------------------
 
@@ -53,8 +33,8 @@ _win_to_unix_path() {
 _add_to_path() {
   local input="$1"
   local new
-  new="$(_win_to_unix_path "$input")"
 
+  new="$(_win_to_unix_path "$input")"
   new="$(realpath -m "$new" 2>/dev/null || echo "$new")"
 
   local IFS=':'
@@ -95,6 +75,15 @@ _add_to_path() {
 }
 # -------------------------------------------------------------------------------------
 {{- end }}
+
+# Define variáveis XDG se não estiverem definidas
+export XDG_CONFIG_HOME="$(_win_to_unix_path "{{ .env.xdg_config_home }}")"
+export XDG_BIN_HOME="$(_win_to_unix_path "{{ .env.xdg_bin_home }}")"
+export XDG_DATA_HOME="$(_win_to_unix_path "{{ .env.xdg_data_home }}")"
+export XDG_STATE_HOME="$(_win_to_unix_path "{{ .env.xdg_state_home }}")"
+
+# Cria os diretórios XDG se não existirem
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
 
 # Adiciona o diretório de binários do usuário ao PATH
 _add_to_path "$XDG_BIN_HOME"

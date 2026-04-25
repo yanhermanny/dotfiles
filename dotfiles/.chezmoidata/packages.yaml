@@ -27,6 +27,8 @@ packages:
       - name: libffi-dev
       - name: liblzma-dev
       - name: bat
+        post_install:
+          - if ! command -v "bat" &>/dev/null && command -v "batcat" &>/dev/null; then ([ ! -f "$XDG_BIN_HOME/bat" ] && ln -sf "/usr/bin/batcat" "$XDG_BIN_HOME/bat"); fi
     curl:
       - name: pyenv
         url: https://pyenv.run
@@ -47,9 +49,6 @@ packages:
     pip:
       - name: pipx
     pipx: []
-    symbolic_link:
-      - name: $XDG_BIN_HOME/bat
-        target: /usr/bin/batcat
   windows:
     winget:
       - name: Microsoft.PowerShell
