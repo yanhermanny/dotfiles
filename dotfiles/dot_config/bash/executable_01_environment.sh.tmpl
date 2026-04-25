@@ -77,10 +77,22 @@ _add_to_path() {
 {{- end }}
 
 # Define variáveis XDG se não estiverem definidas
-export XDG_CONFIG_HOME="$(_win_to_unix_path "{{ .env.xdg_config_home }}")"
-export XDG_BIN_HOME="$(_win_to_unix_path "{{ .env.xdg_bin_home }}")"
-export XDG_DATA_HOME="$(_win_to_unix_path "{{ .env.xdg_data_home }}")"
-export XDG_STATE_HOME="$(_win_to_unix_path "{{ .env.xdg_state_home }}")"
+{{- if .system.is_windows }}
+XDG_CONFIG_HOME="$(_win_to_unix_path "${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}")"
+XDG_BIN_HOME="$(_win_to_unix_path "${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}")"
+XDG_DATA_HOME="$(_win_to_unix_path "${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}")"
+XDG_STATE_HOME="$(_win_to_unix_path "${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}")"
+{{- else }}
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
+XDG_BIN_HOME="${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}"
+XDG_STATE_HOME="${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}"
+{{- end }}
+
+export XDG_CONFIG_HOME
+export XDG_BIN_HOME
+export XDG_DATA_HOME
+export XDG_STATE_HOME
 
 # Cria os diretórios XDG se não existirem
 mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
