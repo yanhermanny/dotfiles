@@ -1,20 +1,16 @@
 {{- if .system.is_windows -}}
 chezmoi:template:missing-key=invalid
+# ==============================================================================
+# Inicialização
+# ==============================================================================
 Write-Host "[chezmoi] Sistema operacional detectado: Windows" -ForegroundColor Cyan
 Write-Host "[chezmoi] Iniciando instalação declarativa..." -ForegroundColor Cyan
 
-# -------------------------------------------------------------------------------------
-# Helper: executa comandos (hooks)
-function Invoke-Hook {
-  param([string]$Command)
+# ==============================================================================
+# Helpers
+# ==============================================================================
 
-  Write-Host "[hook] Executando: $Command" -ForegroundColor DarkGray
-  Invoke-Expression $Command
-}
-# -------------------------------------------------------------------------------------
-
-# -------------------------------------------------------------------------------------
-# Helper: verifica se pacote winget já está instalado
+# ---- winget ------------------------------------------------------------------
 function Test-WingetInstalled {
   param([string]$Id)
 
@@ -25,20 +21,15 @@ function Test-WingetInstalled {
   }
   return $false
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacote via winget
 function Install-WingetPackage {
   param([string]$Id)
 
   Write-Host "[winget] Instalando $Id..." -ForegroundColor Yellow
   winget install --exact --id $Id --accept-package-agreements --accept-source-agreements --source winget
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: verifica se pacote Invoke-WebRequest já está instalado
+# ---- Invoke-WebRequest -------------------------------------------------------
 function Test-WebRequestInstalled {
   param([string]$Name)
 
@@ -48,10 +39,7 @@ function Test-WebRequestInstalled {
   }
   return $false
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacote via Invoke-WebRequest
 function Install-WebRequestPackage {
   param([string]$Name, [string]$Url, [string]$OutFile)
 
@@ -60,10 +48,8 @@ function Install-WebRequestPackage {
   powershell -ExecutionPolicy Bypass -File $OutFile
   Remove-Item $OutFile -ErrorAction SilentlyContinue
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: verifica se pacote pip já está instalado
+# ---- pip ---------------------------------------------------------------------
 function Test-PipInstalled {
   param([string]$Package)
 
@@ -74,20 +60,15 @@ function Test-PipInstalled {
   }
   return $false
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacote pip
 function Install-PipPackage {
   param([string]$Package)
 
   Write-Host "[pip] Instalando $Package..." -ForegroundColor Yellow
   pip install --upgrade --upgrade-strategy eager $Package
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: verifica se pacote pipx já está instalado
+# ---- pipx --------------------------------------------------------------------
 function Test-PipxInstalled {
   param([string]$Package)
 
@@ -97,53 +78,60 @@ function Test-PipxInstalled {
   }
   return $false
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacote pipx
 function Install-PipxPackage {
   param([string]$Package)
 
   Write-Host "[pipx] Instalando $Package..." -ForegroundColor Yellow
   pipx install $Package
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: verifica comando disponível
+# ---- hooks -------------------------------------------------------------------
+function Invoke-Hook {
+  param([string]$Command)
+
+  Write-Host "[hook] Executando: $Command" -ForegroundColor DarkGray
+  Invoke-Expression $Command
+}
+
+# ---- Utilitários gerais ------------------------------------------------------
 function Test-Command {
   param([string]$Cmd)
 
   return (Get-Command $Cmd -ErrorAction SilentlyContinue)
 }
-# -------------------------------------------------------------------------------------
 
-# =====================================================================================
-# Declarar variáveis de ambiente para o script
-# =====================================================================================
+# ==============================================================================
+# Variáveis de ambiente (para instalação)
+# ==============================================================================
 $env:XDG_CONFIG_HOME = "{{ .env.xdg_config_home }}"
 $env:XDG_BIN_HOME = "{{ .env.xdg_bin_home }}"
 $env:XDG_DATA_HOME = "{{ .env.xdg_data_home }}"
 $env:XDG_STATE_HOME = "{{ .env.xdg_state_home }}"
-# -------------------------------------------------------------------------------------
 
-# =====================================================================================
-# Habilitar winget
-# =====================================================================================
+# ==============================================================================
+# Setup do sistema
+# ==============================================================================
+
+# Garante disponibilidade do winget
 if (-not (Test-Command "winget")) {
   Write-Host "[chezmoi] Habilitando winget..." -ForegroundColor Cyan
   Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
 }
-# -------------------------------------------------------------------------------------
 
+# Atualiza pacotes existentes
 Write-Host "`n[chezmoi] Atualizando pacotes via winget..." -ForegroundColor Green
 winget upgrade --all --accept-package-agreements --accept-source-agreements --source winget
 
-{{ with .packages.windows -}}
-{{ with .winget -}}
-# =====================================================================================
-# Instalar pacotes via winget
-# =====================================================================================
+{{- with .packages.windows }}
+
+# ==============================================================================
+# Instalação de pacotes (declarativa)
+# ==============================================================================
+
+{{- with .winget }}
+
+# ---- winget ------------------------------------------------------------------
 Write-Host "`n[chezmoi] Instalando pacotes via winget..." -ForegroundColor Green
 
 {{- range . }}
@@ -161,14 +149,13 @@ if (-not (Test-WingetInstalled "{{ .name }}")) {
   {{- end }}
 }
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 
-{{ with .invoke_web_request -}}
-# =====================================================================================
-# Instalar via Invoke-WebRequest
-# =====================================================================================
+{{- with .invoke_web_request }}
+
+# ---- Invoke-WebRequest -------------------------------------------------------
 Write-Host "`n[chezmoi] Instalando pacotes via Invoke-WebRequest..." -ForegroundColor Green
+
 {{- range . }}
 if (-not (Test-WebRequestInstalled "{{ .name }}")) {
   {{- with .pre_install }}
@@ -185,14 +172,13 @@ if (-not (Test-WebRequestInstalled "{{ .name }}")) {
   {{- end }}
 }
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 
-{{ with .pip -}}
-# =====================================================================================
-# Instalar pacotes pip
-# =====================================================================================
+{{- with .pip }}
+
+# ---- pip ---------------------------------------------------------------------
 Write-Host "`n[chezmoi] Instalando pacotes pip..." -ForegroundColor Green
+
 {{- range . }}
 if (-not (Test-PipInstalled "{{ .name }}")) {
   {{- with .pre_install }}
@@ -208,14 +194,13 @@ if (-not (Test-PipInstalled "{{ .name }}")) {
   {{- end }}
 }
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 
-{{ with .pipx -}}
-# =====================================================================================
-# Instalar pacotes pipx
-# =====================================================================================
+{{- with .pipx }}
+
+# ---- pipx --------------------------------------------------------------------
 Write-Host "`n[chezmoi] Instalando pacotes pipx..." -ForegroundColor Green
+
 {{- range . }}
 if (-not (Test-PipxInstalled "{{ .name }}")) {
   {{- with .pre_install }}
@@ -231,8 +216,12 @@ if (-not (Test-PipxInstalled "{{ .name }}")) {
   {{- end }}
 }
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 {{- end }}
+
+# ==============================================================================
+# Finalização
+# ==============================================================================
 Write-Host "`n[chezmoi] Instalação concluída com sucesso!" -ForegroundColor Cyan
+
 {{- end }}

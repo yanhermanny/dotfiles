@@ -4,54 +4,75 @@
 # Aliases
 # --------------------------------------------------------------------------------
 
-# ls Command Options
-#   -1: Lists all files and directories in one column.
-#   -h: Displays files sizes in a human-readable format (example: 1K, 234M, 2G).
-#   -F: Displays symbols for file types (* for executables, / for directories etc).
-#   -A: Lists all files except for current and previous dir indicators (., ..).
-#   -l: Displays detailed information about files and directories in table format.
-# --------------------------------------------------------------------------------
-{{ if .system.is_windows -}}
-# Set exclusions from ls command
+# ==============================================================================
+# ls (listagem de arquivos)
+# ==============================================================================
+
+# Opções utilizadas:
+# -1 : uma entrada por linha
+# -h : tamanhos legíveis (1K, 234M, 2G)
+# -F : sufixos de tipo (*, /, etc)
+# -A : inclui arquivos ocultos (exceto . e ..)
+# -l : formato detalhado
+
+{{- if not .system.is_windows }}
+
+# Exclusões específicas do Windows
 LS_EXCLUSIONS="-I desktop.ini"
 LS_EXCLUSIONS="$LS_EXCLUSIONS -I My\ Documents\*"
 LS_EXCLUSIONS="$LS_EXCLUSIONS -I NTUSER\*"
 LS_EXCLUSIONS="$LS_EXCLUSIONS -I ntuser\*"
 
 alias ls="command ls -F --color=auto $LS_EXCLUSIONS"
-{{ else -}}
+{{- else }}
 alias ls="command ls -F --color=auto"
-{{ end -}}
-
+{{- end }}
 alias la="ls -A"
 alias ll="ls -lhA"
 
-# Colorize grep
+# ==============================================================================
+# Busca (grep)
+# ==============================================================================
+
+# Ativa cores automaticamente
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-# Change to root directory without space
+# ==============================================================================
+# Navegação de diretórios
+# ==============================================================================
+
+# Ir para root sem espaço (cd/)
 cd/() {
   cd /
 }
 
-# Change to previous directory without space
+# Subir diretório rapidamente
 alias cd..='cd ../'
 alias ..='cd ../'
 
-# Put prompt to new line when cat file without trailing line
+# ==============================================================================
+# Substituições de comandos
+# ==============================================================================
+
+# Usa bat no lugar de cat (sem pager)
 alias cat='bat --paging=never'
 
-{{- if .system.is_windows }}
-# Uses tree command from Windows
+# Usa delta no lugar de diff
+alias diff="delta"
+
+{{- if not .system.is_windows }}
+
+# ==============================================================================
+# Ajustes específicos do Windows
+# ==============================================================================
+
+# tree (versão nativa do Windows)
 alias tree="tree.com //A"
 
-# Support opening Windows Explorer at path
+# Abrir diretório no Explorer
 explorer() {
-  command explorer `cygpath -w $@`
+  command explorer "$(cygpath -w "$@")"
 }
 {{- end }}
-
-# Uses delta for diff command
-alias diff="delta"

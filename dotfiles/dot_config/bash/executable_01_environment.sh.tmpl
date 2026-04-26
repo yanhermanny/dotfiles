@@ -1,18 +1,20 @@
 #!/usr/bin/env sh
 # ~/.config/bash/01_environment.sh
 # --------------------------------------------------------------------------------
-# Configurações do ambiente de shell
+# Configurações do ambiente do shell
 # --------------------------------------------------------------------------------
 
+# ==============================================================================
+# Helpers
+# ==============================================================================
 {{- if .system.is_windows }}
 
-# -------------------------------------------------------------------------------------
-# Helper: converte caminho do Windows para Unix
+# Converte caminhos do Windows para formato Unix
 _win_to_unix_path() {
   local input="$1"
   local expanded="$input"
 
-  # Expande variáveis de ambiente do Windows no formato %VAR%
+  # Expande variáveis de ambiente no formato %VAR%
   while [[ "$expanded" =~ %([^%]+)% ]]; do
     local var="${BASH_REMATCH[1]}"
     local value="${!var}"
@@ -26,10 +28,8 @@ _win_to_unix_path() {
 
   cygpath -u "$expanded"
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: adiciona caminho ao PATH
+# Adiciona caminho ao PATH (normalizando e evitando duplicados)
 _add_to_path() {
   local input="$1"
   local new
@@ -62,21 +62,21 @@ _add_to_path() {
 
   export PATH
 }
-# -------------------------------------------------------------------------------------
 {{- else }}
 
-# -------------------------------------------------------------------------------------
-# Helper: adiciona caminho ao PATH
+# Adiciona caminho ao PATH (evitando duplicados)
 _add_to_path() {
   local dir="$1"
   if [[ -d "$dir" && ":$PATH:" != *":$dir:"* ]]; then
     export PATH="$dir:$PATH"
   fi
 }
-# -------------------------------------------------------------------------------------
 {{- end }}
 
-# Define variáveis XDG se não estiverem definidas
+# ==============================================================================
+# XDG Base Directories
+# ==============================================================================
+
 {{- if .system.is_windows }}
 XDG_CONFIG_HOME="$(_win_to_unix_path "${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}")"
 XDG_BIN_HOME="$(_win_to_unix_path "${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}")"
@@ -94,40 +94,63 @@ export XDG_BIN_HOME
 export XDG_DATA_HOME
 export XDG_STATE_HOME
 
-# Cria os diretórios XDG se não existirem
+# Garante existência dos diretórios
 mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
 
-# Adiciona o diretório de binários do usuário ao PATH
+# Binários do usuário no PATH
 _add_to_path "$XDG_BIN_HOME"
 
-# Define o editor padrão
+# ==============================================================================
+# Variáveis gerais de ambiente
+# ==============================================================================
 export EDITOR='nano'
-
-# Opções do ls para cores automáticas
 export LS_OPTIONS='--color=auto'
 
+# ---- less (pager padrão) -----------------------------------------------------
+# -R   : renderiza cores corretamente
+# -M   : prompt detalhado
+# -N   : números de linha
+# -S   : corta linhas longas (sem wrap)
+# -~   : remove ~ após EOF
+# -#3  : scroll horizontal de 3 colunas
+# -i   : busca case-insensitive (condicional)
+# -+F  : força modo interativo
+# -+X  : usa alternate screen
+export LESS='-RMnS~#3i -+F -+X'
+export LESSCHARSET='utf-8'
+export LESSHISTFILE=-
+
 {{- if .system.is_windows }}
+
+# ==============================================================================
+# Ajustes específicos do Windows (MSYS / Git Bash)
+# ==============================================================================
 
 # Habilita links simbólicos nativos no MSYS2 (Git Bash)
 export MSYS="winsymlinks:native"
 
-# Adiciona o OpenSSH do Windows ao PATH para usar ssh/ssh-agent nativos
+# Usa OpenSSH nativo do Windows
 _add_to_path "/c/Windows/System32/OpenSSH"
 {{- end }}
 
-# Enables Fast Node Manager (fnm)
+# ==============================================================================
+# Ferramentas de desenvolvimento
+# ==============================================================================
+
+# ---- fnm (Node.js) -----------------------------------------------------------
 if command -v fnm > /dev/null 2>&1; then
-  {{ if not .system.is_windows -}}
+  {{- if .system.is_windows }}
   export FNM_DIR="$XDG_DATA_HOME/fnm"
-  {{ end -}}
+  {{- end }}
   eval "$(fnm env --use-on-cd --shell bash)"
 fi
 
-# Setup `pyenv` for Python version management
+# ---- pyenv -------------------------------------------------------------------
 {{- if .system.is_windows }}
 export PYENV_ROOT="$(_win_to_unix_path "${PYENV_ROOT:-$XDG_DATA_HOME/pyenv/pyenv-win}")"
 export PYENV="$PYENV_ROOT"
 export PYENV_HOME="$PYENV_ROOT"
+
 [[ -d $PYENV_ROOT/bin ]] && _add_to_path "$PYENV_ROOT/bin"
 [[ -d $PYENV_ROOT/shims ]] && _add_to_path "$PYENV_ROOT/shims"
 {{- else }}
@@ -136,7 +159,7 @@ export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
 eval "$(pyenv init - bash)"
 {{- end }}
 
-# Define variáveis para o `pipx`
+# ---- pipx --------------------------------------------------------------------
 {{- if .system.is_windows }}
 export PIPX_HOME="$(_win_to_unix_path "${PIPX_HOME:-$XDG_DATA_HOME/pipx}")"
 export PIPX_BIN_DIR="$(_win_to_unix_path "${PIPX_BIN_DIR:-$XDG_BIN_HOME}")"
@@ -145,36 +168,17 @@ export PIPX_HOME="$XDG_DATA_HOME/pipx"
 export PIPX_BIN_DIR="$XDG_BIN_HOME"
 {{- end }}
 
-# Define local para configurações do `bat`
+# ---- bat ---------------------------------------------------------------------
 {{- if .system.is_windows }}
 export BAT_CONFIG_DIR="$(_win_to_unix_path "${BAT_CONFIG_DIR:-$XDG_CONFIG_HOME/bat}")"
 {{- else }}
 export BAT_CONFIG_DIR="$XDG_CONFIG_HOME/bat"
 {{- end }}
 
-# Define o comportamento do comando less
-## -R: melhor exibição de caracteres de controle
-## -M: prompt longo, com nome do arquivo e informações da quantidade de linhas
-## -N: ativa números de linha
-## -S: ativa o 'chop-long-lines', ou seja, trunca linhas maiores que a tela (desativa o line wrap)
-## -~: desativa a exibição de '~' nas linhas após o fim do arquivo
-## -#3: configura o scroll horizontal para 3 posições por vez
-## -i: pesquisa case insensitive, a menos que haja letras maiúsculas na busca
-## -+F: desativa o 'quit-if-one-screen', ou seja, sempre entra no modo interativo, mesmo para saídas curtas
-## -+X: desativa o 'no-init', ou seja, sempre utiliza o alternate screen, limpando a tela ao sair
-## Utilizar cores
-### -DNk: números de linha pretos
-### -DPc: prompt cyano
-### -DRc: rscroll character cyano
-export LESS='-RMnS~#3i -+F -+X'
-
-# Define o charset utilizado
-export LESSCHARSET='utf-8'
-
-# Desabilita o histórico do less
-export LESSHISTFILE=-
-
+# ==============================================================================
+# Limpeza (helpers temporários)
+# ==============================================================================
 {{ if .system.is_windows -}}
 unset -f _win_to_unix_path
-{{- end }}
+{{ end -}}
 unset -f _add_to_path

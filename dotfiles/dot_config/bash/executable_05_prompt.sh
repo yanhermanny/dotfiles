@@ -1,51 +1,60 @@
 #!/usr/bin/env sh
 # ~/.config/bash/05_prompt.sh
 # --------------------------------------------------------------------------------
-# Definição do Prompt (PS1)
+# Prompt (PS1)
 # --------------------------------------------------------------------------------
 
-# ======================== Definição do visual do prompt =========================
+# ==============================================================================
+# Definição do prompt
+# ==============================================================================
 set_custom_prompt() {
-    # Variáveis de Cores (códigos de escape ANSI)
+    # ---- Cores (ANSI) --------------------------------------------------------
     local RESET="\[\033[0m\]"
     local RED="\[\033[01;31m\]"
     local GREEN="\[\033[01;32m\]"
     local CYAN="\[\033[01;36m\]"
     local BLUE="\[\033[01;34m\]"
+
+    # ---- Configurações gerais ------------------------------------------------
     local SEPARATOR=":"
 
-    # Verifica se o shell está rodando como administrador (root)
-    if net session > /dev/null 2>&1; then
-      local TITLEPREFIX='ADMIN: '
-    else
-      local TITLEPREFIX=''
-    fi
-    PS1='\[\033]0;$TITLEPREFIX$PWD\007\]' # Define o título da janela
+    # ---- Título da janela ----------------------------------------------------
 
-    # Cor do usuário: vermelho se root, verde se usuário normal
+    # Detecta privilégio administrativo (Windows / Git Bash)
+    local TITLEPREFIX=""
+    if net session > /dev/null 2>&1; then
+        TITLEPREFIX='ADMIN: '
+    fi
+
+    # Define título: [ADMIN:] caminho atual
+    local WINDOW_TITLE='\[\033]0;'${TITLEPREFIX}'\w\007\]'
+
+    # ---- Usuário (cor depende de privilégio) ---------------------------------
     local USER_COLOR="$GREEN"
     [ "$EUID" -eq 0 ] && USER_COLOR="$RED"
 
-    # Elementos do prompt
     local USER_HOST="${USER_COLOR}"'\u@\h'"${RESET}"
+
+    # ---- Diretório atual -----------------------------------------------------
     local DIR="${BLUE}"'\w'"${RESET}"
+
+    # ---- Git (branch atual) --------------------------------------------------
     local GIT_BRANCH=""
     if type __git_ps1 > /dev/null 2>&1; then
         GIT_BRANCH="${CYAN}$(__git_ps1)${RESET}"
     fi
 
-    # Prompt final com separadores
-    PS1="${PS1}${USER_HOST}${SEPARATOR}${DIR}${GIT_BRANCH}"'\$ '
+    # ---- Montagem final do PS1 -----------------------------------------------
+    PS1="${WINDOW_TITLE}${USER_HOST}${SEPARATOR}${DIR}${GIT_BRANCH}"'\$ '
 }
 
-# Aplicar o prompt a cada linha
+# ==============================================================================
+# Aplicação do prompt
+# ==============================================================================
+
+# Executa a função a cada renderização do prompt
 if [[ -n "$PROMPT_COMMAND" ]]; then
     PROMPT_COMMAND="${PROMPT_COMMAND}; set_custom_prompt"
 else
     PROMPT_COMMAND="set_custom_prompt"
 fi
-
-
-# Limpa variáveis temporárias
-unset RESET RED GREEN CYAN BLUE SEPARATOR USER_COLOR TITLEPREFIX USER_HOST DIR GIT_BRANCH
-# ================================================================================

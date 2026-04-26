@@ -1,16 +1,22 @@
-{{- if (or .system.is_linux .system.is_wsl) -}}
+{{- if not (or .system.is_linux .system.is_wsl) -}}
 chezmoi:template:missing-key=invalid
 #!/usr/bin/env bash
 
 set -e
 
+# ==============================================================================
+# Inicialização
+# ==============================================================================
 echo "[chezmoi] Sistema operacional detectado: Linux"
 echo "[chezmoi] Iniciando instalação declarativa..."
 
-{{ if .system.is_wsl -}}
-# =====================================================================================
-# Verificar se WSL está herdando PATH do Windows
-# =====================================================================================
+{{- if .system.is_wsl }}
+
+# ==============================================================================
+# Validação de ambiente WSL
+# ==============================================================================
+
+# Evita conflitos causados por PATH herdado do Windows
 if echo "$PATH" | tr ':' '\n' | grep -qi '^/mnt/[a-z]/'; then
   echo -e "\n[chezmoi] ❌ Execução interrompida para evitar conflitos."
   echo "[chezmoi] ⚠️ Detectado PATH do Windows no WSL."
@@ -24,19 +30,13 @@ if echo "$PATH" | tr ':' '\n' | grep -qi '^/mnt/[a-z]/'; then
   echo -e "\n[chezmoi] Após isso, execute novamente o chezmoi."
   exit 1
 fi
-# -------------------------------------------------------------------------------------
+{{- end }}
 
-{{ end -}}
-sudo="sudo"
-{{ if eq .chezmoi.username "root" -}}
-sudo=""
-{{ end -}}
+# ==============================================================================
+# Helpers
+# ==============================================================================
 
-echo -e "\n[apt] Atualizando pacotes já instalados..."
-$sudo apt update && $sudo apt upgrade -y
-
-# -------------------------------------------------------------------------------------
-# Helper: verifica pacote instalado via apt
+# ---- apt ---------------------------------------------------------------------
 verify_apt_package() {
   local name="$1"
   if dpkg -s "$name" &>/dev/null; then
@@ -46,19 +46,14 @@ verify_apt_package() {
     return 1
   fi
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacotes via apt
 install_apt_package() {
   local name="$1"
   echo "[apt] Instalando $name..."
   $sudo apt install -y "$name"
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: verifica pacote instalado via curl
+# ---- curl --------------------------------------------------------------------
 verify_curl_package() {
   local name="$1"
   if command -v "$name" &>/dev/null; then
@@ -68,10 +63,7 @@ verify_curl_package() {
     return 1
   fi
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacotes via curl
 install_curl_package() {
   local name="$1"
   local url="$2"
@@ -83,10 +75,8 @@ install_curl_package() {
     curl -fsSL "$url" | bash
   fi
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: verifica pacote instalado via pip
+# ---- pip ---------------------------------------------------------------------
 verify_pip_package() {
   local name="$1"
   if pip show "$name" &>/dev/null; then
@@ -96,19 +86,14 @@ verify_pip_package() {
     return 1
   fi
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacotes pip
 install_pip_package() {
   local name="$1"
   echo "[pip] Instalando $name..."
   pip install --upgrade --upgrade-strategy eager "$name"
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: verifica pacote instalado via pipx
+# ---- pipx --------------------------------------------------------------------
 verify_pipx_package() {
   local name="$1"
   if pipx list | grep -q "$name"; then
@@ -118,40 +103,52 @@ verify_pipx_package() {
     return 1
   fi
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: instala pacotes pipx
 install_pipx_package() {
   local name="$1"
   echo "[pipx] Instalando $name..."
   pipx install "$name"
 }
-# -------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------------------
-# Helper: Função genérica para executar hooks (lista de comandos)
+# ---- hooks -------------------------------------------------------------------
 run_hook_command() {
   local command="$1"
   echo "[hook] Executando: $command"
   eval "$command"
 }
-# -------------------------------------------------------------------------------------
 
-# =====================================================================================
-# Declarar variáveis de ambiente para os scripts de instalação
-# =====================================================================================
+# ==============================================================================
+# Variáveis de ambiente (para instalação)
+# ==============================================================================
 export XDG_CONFIG_HOME="{{ .env.xdg_config_home }}"
 export XDG_BIN_HOME="{{ .env.xdg_bin_home }}"
 export XDG_DATA_HOME="{{ .env.xdg_data_home }}"
 export XDG_STATE_HOME="{{ .env.xdg_state_home }}"
-# -------------------------------------------------------------------------------------
 
-{{ with .packages.linux -}}
-{{ with .apt -}}
-# =====================================================================================
-# Instalar pacotes via apt
-# =====================================================================================
+# ==============================================================================
+# Setup do sistema
+# ==============================================================================
+
+# Define privilégio de sudo (para root, não é necessário)
+{{- if eq .chezmoi.username "root" }}
+local sudo=""
+{{- else }}
+local sudo="sudo"
+{{- end }}
+
+# Atualiza pacotes existentes
+echo -e "\n[apt] Atualizando pacotes já instalados..."
+$sudo apt update && $sudo apt upgrade -y
+
+{{- with .packages.linux }}
+
+# ==============================================================================
+# Instalação de pacotes (declarativa)
+# ==============================================================================
+
+{{- with .apt }}
+
+# ---- apt ---------------------------------------------------------------------
 echo -e "\n[chezmoi] Instalando pacotes via apt..."
 {{- range . }}
 if ! verify_apt_package "{{ .name }}"; then
@@ -168,13 +165,11 @@ if ! verify_apt_package "{{ .name }}"; then
   {{- end }}
 fi
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 
-{{ with .curl -}}
-# =====================================================================================
-# Instalar pacotes via curl
-# =====================================================================================
+{{- with .curl }}
+
+# ---- curl --------------------------------------------------------------------
 echo -e "\n[chezmoi] Instalando pacotes via curl..."
 {{- range . }}
 if ! verify_curl_package "{{ .name }}"; then
@@ -191,13 +186,11 @@ if ! verify_curl_package "{{ .name }}"; then
   {{- end }}
 fi
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 
-{{ with .pip -}}
-# =====================================================================================
-# Instalar pacotes via pip
-# =====================================================================================
+{{- with .pip }}
+
+# ---- pip ---------------------------------------------------------------------
 echo -e "\n[chezmoi] Instalando pacotes pip declarados..."
 {{- range . }}
 if ! verify_pip_package "{{ .name }}"; then
@@ -214,13 +207,11 @@ if ! verify_pip_package "{{ .name }}"; then
   {{- end }}
 fi
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 
-{{ with .pipx -}}
-# =====================================================================================
-# Instalar pacotes via pipx
-# =====================================================================================
+{{- with .pipx }}
+
+# ---- pipx --------------------------------------------------------------------
 echo -e "\n[chezmoi] Instalando pacotes pipx declarados..."
 {{- range . }}
 if ! verify_pipx_package "{{ .name }}"; then
@@ -237,10 +228,13 @@ if ! verify_pipx_package "{{ .name }}"; then
   {{- end }}
 fi
 {{- end }}
-# -------------------------------------------------------------------------------------
 {{- end }}
 {{- end }}
 
+# ==============================================================================
+# Finalização
+# ==============================================================================
 echo -e "\n[chezmoi] Instalação concluída com sucesso!"
 echo "[chezmoi] Para aplicar as mudanças, recarregue seu shell ou execute: source ~/.bashrc"
+
 {{- end }}

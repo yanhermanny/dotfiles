@@ -4,88 +4,89 @@
 # Configurações de Entrada (Input, Readline e Autocomplete)
 # --------------------------------------------------------------------------------
 
-# =========================== Carregar bash-completion ===========================
+# ==============================================================================
+# bash-completion
+# ==============================================================================
 if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 elif [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
 fi
-# ================================================================================
 
-# ============================== Histórico do Shell ==============================
-# Localização do arquivo de histórico
+# ==============================================================================
+# Histórico do shell
+# ==============================================================================
+
+# ---- Arquivo de histórico (XDG) ----------------------------------------------
 HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/bash/bash_history"
 
-# Garante que o diretório existe
+# Garante que diretório e arquivo existam
 mkdir -p "$(dirname "$HISTFILE")"
-
-# Garante que o arquivo existe e é legível/escrevível
 if [[ ! -f "$HISTFILE" ]]; then
     touch "$HISTFILE"
     chmod 600 "$HISTFILE"
 fi
 
-# Sempre adicionar, nunca sobrescrever o histórico anterior
+# ---- Comportamento do histórico ----------------------------------------------
+
+# Sempre adicionar ao invés de sobrescrever
 shopt -s histappend
 
-# Salvar cada comando imediatamente após execução
+# Sincroniza histórico entre sessões (append + reload)
 if [[ -n "$PROMPT_COMMAND" ]]; then
     PROMT_COMMAND='history -a; history -n; '"$PROMPT_COMMAND"
 else
     PROMPT_COMMAND='history -a; history -n'
 fi
 
-# Limitar número de comandos mantidos na memória
-HISTSIZE=5000
+# Tamanho do histórico
+HISTSIZE=5000        # memória
+HISTFILESIZE=20000   # arquivo
 
-# Limitar tamanho total do arquivo $HISTFILE
-HISTFILESIZE=20000
-
-# Evita duplicatas e comandos consecutivos repetidos
+# Controle de duplicatas e privacidade
 # ignoreboth = ignoredups + ignorespace
-# erasedups  = remove duplicatas antigas do arquivo
+# erasedups  = remove duplicatas antigas
 HISTCONTROL=ignoreboth:erasedups
 
 # Evita registrar comandos sensíveis (como senhas ou tokens)
 HISTIGNORE="*password*:*secret*:*token*"
-# ================================================================================
 
-# ===================== Configurações de Readline (Bindings) =====================
-# Mapeia a tecla Home para ir para o início da linha (com o ^[[H)
-bind '"\e[1~": beginning-of-line'
+# ==============================================================================
+# Readline (keybindings)
+# ==============================================================================
 
-# Mapeia a tecla End para ir para o fim da linha (com o ^[[F)
-bind '"\e[4~": end-of-line'
+# Navegação básica
+bind '"\e[1~": beginning-of-line'   # Home
+bind '"\e[4~": end-of-line'         # End
 
-# ESC deleta a linha inteira
-bind '"\e":kill-whole-line'
+# Edição
+bind '"\e":kill-whole-line'         # ESC → apaga linha inteira
 
-# CTRL+L limpa a tela
-bind '"\C-l":clear-display'
-# ================================================================================
+# Limpeza de tela
+bind '"\C-l":clear-display'         # Ctrl+L
 
-# ======================== Configurações de Autocomplete =========================
-# Usa menu de autocomplete estilo "ciclo" (TAB/SHIFT+TAB)
-bind 'set show-all-if-ambiguous off'        # Mostra sugestões automaticamente
-bind 'set completion-ignore-case on'        # Ignora diferenças de maiúsculas/minúsculas
-bind 'set colored-stats on'                 # Habilita cores no autocomplete
-bind 'set visible-stats on'                 # Exibe símbolos visuais para indicar o tipo do ítem
+# ==============================================================================
+# Autocomplete
+# ==============================================================================
 
-# TAB = próxima sugestão, SHIFT+TAB = anterior
-bind '"\t":menu-complete'                   # TAB → completa o próximo item
-bind '"\e[Z":menu-complete-backward'        # SHIFT+TAB → volta para a sugestão anterior
-# ================================================================================
+# Comportamento geral
+bind 'set show-all-if-ambiguous off'   # não mostra lista automaticamente
+bind 'set completion-ignore-case on'   # case insensitive
+bind 'set colored-stats on'            # cores
+bind 'set visible-stats on'            # indicadores visuais
 
-# ============================ Outras Opções de Shell ============================
-# Permite expressões complexas como `ls *.(png|jpg)` (Extended Globbing)
+# Navegação no menu
+bind '"\t":menu-complete'              # TAB → próximo
+bind '"\e[Z":menu-complete-backward'   # SHIFT+TAB → anterior
+
+# ==============================================================================
+# Opções gerais do shell
+# ==============================================================================
+
+# Globbing avançado (ex: *.@(png|jpg))
 shopt -s extglob
 
-# Evita o som de campainha (beep) no terminal
-set bell-style none
-
-# Não exibe caracteres de controle (como ^M) no terminal
-set echo-control-characters off
-
-# Adiciona uma barra (/) ao final dos symbolic links que apontam para diretórios
-set mark-symlinked-directories on
-# ================================================================================
+# Readline / terminal behavior
+set bell-style none                    # desativa beep
+set echo-control-characters off        # oculta ^C, ^M, etc
+set mark-symlinked-directories on      # adiciona "/" em symlinks de diretório
