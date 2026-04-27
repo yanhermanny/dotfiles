@@ -1,10 +1,17 @@
 {{- if .system.is_windows -}}
 chezmoi:template:missing-key=invalid
+
+# ---- Importando utils-library.psm1 --------------------------------------------
+if (-not (Get-Module -Name UtilsLibrary)) {
+    Import-Module "{{ joinPath .chezmoi.workingTree "scripts/windows/UtilsLibrary.psm1" }}"
+}
+
 # ==============================================================================
 # Inicialização
 # ==============================================================================
-Write-Host "[chezmoi] Sistema operacional detectado: Windows" -ForegroundColor Cyan
-Write-Host "[chezmoi] Iniciando instalação declarativa..." -ForegroundColor Cyan
+Log "[chezmoi] Sistema operacional detectado: Windows" -Level Info
+Log "[chezmoi] Iniciando instalação declarativa..." -Level Task
+
 
 # ==============================================================================
 # Helpers
@@ -16,7 +23,7 @@ function Test-WingetInstalled {
 
   $pkg = winget list --exact --id $Id --source winget 2>$null
   if ($pkg -match $Id) {
-    Write-Host "[winget] Ignorando: $Id já está instalado" -ForegroundColor DarkGray
+    Log "[winget] Ignorando: $Id já está instalado" -Level Comment
     return $true
   }
   return $false
@@ -25,7 +32,7 @@ function Test-WingetInstalled {
 function Install-WingetPackage {
   param([string]$Id)
 
-  Write-Host "[winget] Instalando $Id..." -ForegroundColor Yellow
+  Log "[winget] Instalando $Id..." -Level Command
   winget install --exact --id $Id --accept-package-agreements --accept-source-agreements --source winget
 }
 
@@ -34,7 +41,7 @@ function Test-WebRequestInstalled {
   param([string]$Name)
 
   if (Test-Command $Name) {
-    Write-Host "[iwr] Ignorando: $Name já está instalado" -ForegroundColor DarkGray
+    Log "[iwr] Ignorando: $Name já está instalado" -Level Comment
     return $true
   }
   return $false
@@ -43,7 +50,7 @@ function Test-WebRequestInstalled {
 function Install-WebRequestPackage {
   param([string]$Name, [string]$Url, [string]$OutFile)
 
-  Write-Host "[iwr] Instalando $Name..." -ForegroundColor Yellow
+  Log "[iwr] Instalando $Name..." -Level Command
   Invoke-WebRequest $Url -OutFile $OutFile
   powershell -ExecutionPolicy Bypass -File $OutFile
   Remove-Item $OutFile -ErrorAction SilentlyContinue
@@ -55,7 +62,7 @@ function Test-PipInstalled {
 
   $pkg = pip show $Package 2>$null
   if ($pkg -match $Package) {
-    Write-Host "[pip] Ignorando: $Package já está instalado" -ForegroundColor DarkGray
+    Log "[pip] Ignorando: $Package já está instalado" -Level Comment
     return $true
   }
   return $false
@@ -64,7 +71,7 @@ function Test-PipInstalled {
 function Install-PipPackage {
   param([string]$Package)
 
-  Write-Host "[pip] Instalando $Package..." -ForegroundColor Yellow
+  Log "[pip] Instalando $Package..." -Level Command
   pip install --upgrade --upgrade-strategy eager $Package
 }
 
@@ -73,7 +80,7 @@ function Test-PipxInstalled {
   param([string]$Package)
 
   if (pipx list 2>$null | Select-String $Package -Quiet) {
-    Write-Host "[pipx] Ignorando: $Package já está instalado" -ForegroundColor DarkGray
+    Log "[pipx] Ignorando: $Package já está instalado" -Level Comment
     return $true
   }
   return $false
@@ -82,7 +89,7 @@ function Test-PipxInstalled {
 function Install-PipxPackage {
   param([string]$Package)
 
-  Write-Host "[pipx] Instalando $Package..." -ForegroundColor Yellow
+  Log "[pipx] Instalando $Package..." -Level Command
   pipx install $Package
 }
 
@@ -90,7 +97,7 @@ function Install-PipxPackage {
 function Invoke-Hook {
   param([string]$Command)
 
-  Write-Host "[hook] Executando: $Command" -ForegroundColor DarkGray
+  Log "[hook] Executando: $Command" -Level Command
   Invoke-Expression $Command
 }
 
@@ -115,12 +122,12 @@ $env:XDG_STATE_HOME = "{{ .env.xdg_state_home }}"
 
 # Garante disponibilidade do winget
 if (-not (Test-Command "winget")) {
-  Write-Host "[chezmoi] Habilitando winget..." -ForegroundColor Cyan
+  Log "[chezmoi] Habilitando winget..." -Level Task
   Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
 }
 
 # Atualiza pacotes existentes
-Write-Host "`n[chezmoi] Atualizando pacotes via winget..." -ForegroundColor Green
+Log "`n[chezmoi] Atualizando pacotes via winget..." -Level Task
 winget upgrade --all --accept-package-agreements --accept-source-agreements --source winget
 
 {{- with .packages.windows }}
@@ -132,7 +139,7 @@ winget upgrade --all --accept-package-agreements --accept-source-agreements --so
 {{- with .winget }}
 
 # ---- winget ------------------------------------------------------------------
-Write-Host "`n[chezmoi] Instalando pacotes via winget..." -ForegroundColor Green
+Log "`n[chezmoi] Instalando pacotes via winget..." -Level Task
 
 {{- range . }}
 if (-not (Test-WingetInstalled "{{ .name }}")) {
@@ -154,7 +161,7 @@ if (-not (Test-WingetInstalled "{{ .name }}")) {
 {{- with .invoke_web_request }}
 
 # ---- Invoke-WebRequest -------------------------------------------------------
-Write-Host "`n[chezmoi] Instalando pacotes via Invoke-WebRequest..." -ForegroundColor Green
+Log "`n[chezmoi] Instalando pacotes via Invoke-WebRequest..." -Level Task
 
 {{- range . }}
 if (-not (Test-WebRequestInstalled "{{ .name }}")) {
@@ -163,7 +170,6 @@ if (-not (Test-WebRequestInstalled "{{ .name }}")) {
   Invoke-Hook '{{ . }}'
   {{- end }}
   {{- end }}
-  Write-Host "[iwr] Instalando {{ .name }}..." -ForegroundColor Yellow
   Install-WebRequestPackage "{{ .name }}" "{{ .url }}" "{{ .out_file }}"
   {{- with .post_install }}
   {{- range . }}
@@ -177,7 +183,7 @@ if (-not (Test-WebRequestInstalled "{{ .name }}")) {
 {{- with .pip }}
 
 # ---- pip ---------------------------------------------------------------------
-Write-Host "`n[chezmoi] Instalando pacotes pip..." -ForegroundColor Green
+Log "`n[chezmoi] Instalando pacotes pip..." -Level Task
 
 {{- range . }}
 if (-not (Test-PipInstalled "{{ .name }}")) {
@@ -199,7 +205,7 @@ if (-not (Test-PipInstalled "{{ .name }}")) {
 {{- with .pipx }}
 
 # ---- pipx --------------------------------------------------------------------
-Write-Host "`n[chezmoi] Instalando pacotes pipx..." -ForegroundColor Green
+Log "`n[chezmoi] Instalando pacotes pipx..." -Level Task
 
 {{- range . }}
 if (-not (Test-PipxInstalled "{{ .name }}")) {
@@ -222,6 +228,6 @@ if (-not (Test-PipxInstalled "{{ .name }}")) {
 # ==============================================================================
 # Finalização
 # ==============================================================================
-Write-Host "`n[chezmoi] Instalação concluída com sucesso!" -ForegroundColor Cyan
+Log "`n[chezmoi] Instalação concluída com sucesso!" -Level Success
 
 {{- end }}
