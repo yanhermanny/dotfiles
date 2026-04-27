@@ -1,0 +1,8 @@
+# Remove arquivos desnecessários ou que serão realocados
+.bash_history
+.bash_login
+.bash_logout
+.bash_profile
+.lesshst
+.motd_shown
+.sudo_as_admin_successful
