@@ -4,20 +4,23 @@ chezmoi:template:missing-key=invalid
 
 set -euo pipefail
 
-# ---- source utils-library.sh -------------------------------------------------
-UTILS_LIB="{{ joinPath .chezmoi.workingTree "scripts/linux/utils-library.sh" }}"
-if [[ -f "$UTILS_LIB" ]]; then
-  source "$UTILS_LIB"
-else
-  printf "\033[%sm%s\033[0m\n" "1;31" "❌ utils-library.sh not found: $UTILS_LIB" >&2
-  exit 1
-fi
+# ---- source utils libraries -------------------------------------------------
+UTILS_LIB="{{ joinPath .chezmoi.workingTree "scripts/linux/utils/bash_utils.sh" }}"
+LOGGER_LIB="{{ joinPath .chezmoi.workingTree "scripts/linux/utils/logger.sh" }}"
+for lib in "$UTILS_LIB" "$LOGGER_LIB"; do
+  if [[ ! -f "$lib" ]]; then
+    printf "\033[%sm%s\033[0m\n" "1;31" "❌ Required library not found: $lib" >&2
+    exit 1
+  fi
+done
+source "$UTILS_LIB"
+source "$LOGGER_LIB"
 
 # ==============================================================================
 # Inicialização
 # ==============================================================================
-log_info "[chezmoi] Sistema operacional detectado: Linux"
-log_task "[chezmoi] Iniciando instalação declarativa..."
+log "[chezmoi] Sistema operacional detectado: Linux" --level INFO
+log "[chezmoi] Iniciando instalação declarativa..." --level TASK
 
 {{- if .system.is_wsl }}
 
@@ -27,10 +30,10 @@ log_task "[chezmoi] Iniciando instalação declarativa..."
 
 # Evita conflitos causados por PATH herdado do Windows
 if echo "$PATH" | tr ':' '\n' | grep -qi '^/mnt/[a-z]/'; then
-  log_error "\n[chezmoi] Execução interrompida para evitar conflitos."
+  log "\n[chezmoi] Execução interrompida para evitar conflitos." --level ERROR
   log "[chezmoi] ⚠️ Detectado PATH do Windows no WSL."
   log "[chezmoi] Isso pode causar conflitos de ferramentas (ex: pyenv, node, etc)."
-  log "[chezmoi] Recomenda-se desabilitar a herança do PATH do Windows:"
+  log "[chezmoi] Recomenda-se desabilitar a herança do PATH do Windows:" --level COMMAND
   log "  1. Edite o arquivo /etc/wsl.conf (como root):"
   log "     [interop]"
   log "     appendWindowsPath=false"
@@ -49,7 +52,7 @@ fi
 verify_apt_package() {
   local name="$1"
   if dpkg -s "$name" &>/dev/null; then
-    log_comment "[apt] Ignorando: $name já está instalado."
+    log "[apt] Ignorando: $name já está instalado." --level COMMENT
     return 0
   else
     return 1
@@ -58,7 +61,7 @@ verify_apt_package() {
 
 install_apt_package() {
   local name="$1"
-  log_command "[apt] Instalando $name..."
+  log "[apt] Instalando $name..." --level COMMAND
   sudo apt install -y "$name"
 }
 
@@ -66,7 +69,7 @@ install_apt_package() {
 verify_curl_package() {
   local name="$1"
   if command -v "$name" &>/dev/null; then
-    log_comment "[curl] Ignorando: $name já está instalado."
+    log "[curl] Ignorando: $name já está instalado." --level COMMENT
     return 0
   else
     return 1
@@ -77,7 +80,7 @@ install_curl_package() {
   local name="$1"
   local url="$2"
   local args="$3"
-  log_command "[curl] Instalando $name..."
+  log "[curl] Instalando $name..." --level COMMAND
   if [ -n "$args" ]; then
     curl -fsSL "$url" | bash -s -- $args
   else
@@ -89,7 +92,7 @@ install_curl_package() {
 verify_pip_package() {
   local name="$1"
   if pip show "$name" &>/dev/null; then
-    log_comment "[pip] Ignorando: $name já está instalado."
+    log "[pip] Ignorando: $name já está instalado." --level COMMENT
     return 0
   else
     return 1
@@ -98,7 +101,7 @@ verify_pip_package() {
 
 install_pip_package() {
   local name="$1"
-  log_command "[pip] Instalando $name..."
+  log "[pip] Instalando $name..." --level COMMAND
   pip install --upgrade --upgrade-strategy eager "$name"
 }
 
@@ -106,7 +109,7 @@ install_pip_package() {
 verify_pipx_package() {
   local name="$1"
   if pipx list | grep -q "$name"; then
-    log_comment "[pipx] Ignorando: $name já está instalado."
+    log "[pipx] Ignorando: $name já está instalado." --level COMMENT
     return 0
   else
     return 1
@@ -115,14 +118,14 @@ verify_pipx_package() {
 
 install_pipx_package() {
   local name="$1"
-  log_command "[pipx] Instalando $name..."
+  log "[pipx] Instalando $name..." --level COMMAND
   pipx install "$name"
 }
 
 # ---- hooks -------------------------------------------------------------------
 run_hook_command() {
   local command="$1"
-  log_command "[hook] Executando: $command"
+  log "[hook] Executando: $command" --level COMMAND
   eval "$command"
 }
 
@@ -139,7 +142,7 @@ export XDG_STATE_HOME="{{ .env.xdg_state_home }}"
 # ==============================================================================
 
 # Atualiza pacotes existentes
-log_task "\n[apt] Atualizando pacotes já instalados..."
+log "\n[apt] Atualizando pacotes já instalados..." --level TASK
 sudo apt update && sudo apt upgrade -y
 
 {{- with .packages.linux }}
@@ -151,7 +154,7 @@ sudo apt update && sudo apt upgrade -y
 {{- with .apt }}
 
 # ---- apt ---------------------------------------------------------------------
-log_task "\n[chezmoi] Instalando pacotes via apt..."
+log "\n[chezmoi] Instalando pacotes via apt..." --level TASK
 {{- range . }}
 if ! verify_apt_package "{{ .name }}"; then
   {{- with .pre_install }}
@@ -172,7 +175,7 @@ fi
 {{- with .curl }}
 
 # ---- curl --------------------------------------------------------------------
-log_task "\n[chezmoi] Instalando pacotes via curl..."
+log "\n[chezmoi] Instalando pacotes via curl..." --level TASK
 {{- range . }}
 if ! verify_curl_package "{{ .name }}"; then
   {{- with .pre_install }}
@@ -193,7 +196,7 @@ fi
 {{- with .pip }}
 
 # ---- pip ---------------------------------------------------------------------
-log_task "\n[chezmoi] Instalando pacotes pip declarados..."
+log "\n[chezmoi] Instalando pacotes pip declarados..." --level TASK
 {{- range . }}
 if ! verify_pip_package "{{ .name }}"; then
   {{- with .pre_install }}
@@ -214,7 +217,7 @@ fi
 {{- with .pipx }}
 
 # ---- pipx --------------------------------------------------------------------
-log_task "\n[chezmoi] Instalando pacotes pipx declarados..."
+log "\n[chezmoi] Instalando pacotes pipx declarados..." --level TASK
 {{- range . }}
 if ! verify_pipx_package "{{ .name }}"; then
   {{- with .pre_install }}
@@ -236,7 +239,7 @@ fi
 # ==============================================================================
 # Finalização
 # ==============================================================================
-log_success "\n[chezmoi] Instalação concluída com sucesso!"
-log_command "[chezmoi] Para aplicar as mudanças, recarregue seu shell ou execute: source ~/.bashrc"
+log "\n[chezmoi] Instalação concluída com sucesso!" --level SUCCESS
+log "[chezmoi] Para aplicar as mudanças, recarregue seu shell ou execute: source ~/.bashrc" --level COMMAND
 
 {{- end }}

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# --------------------------------------------------------------------------------
+# Path utilities
+# --------------------------------------------------------------------------------
+
+{{- if .system.is_windows }}
+
+# ---- converte caminhos do Windows para formato Unix --------------------------
+win_to_unix_path() {
+  local input="$1"
+  local expanded="$input"
+
+  # Expande variáveis de ambiente no formato %VAR%
+  while [[ "$expanded" =~ %([^%]+)% ]]; do
+    local var="${BASH_REMATCH[1]}"
+    local value="${!var}"
+
+    if [[ -z "$value" ]]; then
+      value="$(cmd.exe /C "echo %$var%" 2>/dev/null | tr -d '\r')"
+    fi
+
+    expanded="${expanded//%$var%/$value}"
+  done
+
+  cygpath -u "$expanded"
+}
+
+# ---- adiciona caminho ao PATH (normalizando e evitando duplicados) -----------
+add_to_path() {
+  local input="$1"
+  local new
+
+  new="$(win_to_unix_path "$input")"
+  new="$(realpath -m "$new" 2>/dev/null || echo "$new")"
+
+  local IFS=':'
+  local -a parts=($PATH)
+  local -a filtered=()
+
+  for p in "${parts[@]}"; do
+    [[ -z "$p" ]] && continue
+
+    local p_unix
+    p_unix="$(win_to_unix_path "$p")"
+
+    local resolved
+    resolved="$(realpath -m "$p_unix" 2>/dev/null || echo "$p_unix")"
+
+    if [[ "$resolved" != "$new" ]]; then
+      filtered+=("$p_unix")
+    fi
+  done
+
+  PATH="$new"
+  for p in "${filtered[@]}"; do
+    PATH="$PATH:$p"
+  done
+
+  export PATH
+}
+
+{{- else }}
+
+# ---- adiciona caminho ao PATH (evitando duplicados) --------------------------
+add_to_path() {
+  local dir="$1"
+  if [[ -d "$dir" && ":$PATH:" != *":$dir:"* ]]; then
+    export PATH="$dir:$PATH"
+  fi
+}
+{{- end }}

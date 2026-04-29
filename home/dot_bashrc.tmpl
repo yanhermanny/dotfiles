@@ -8,23 +8,20 @@ case $- in
       *) return;;
 esac
 
-# Define XDG_CONFIG_HOME
-XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
-
 # Diretório base de configuração do Bash
-BASH_CONFIG_DIR="$XDG_CONFIG_HOME/bash"
+BASH_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}/bash"
 
 # Carrega todos os módulos em ordem (01, 02, 03...)
 if [ -d "$BASH_CONFIG_DIR" ]; then
-    for module in "$BASH_CONFIG_DIR"/*.sh; do
-        if [ -r "$module" ]; then
-            # Carrega o módulo
-            source "$module"
-        fi
-    done
+  for module in "$BASH_CONFIG_DIR"/*.sh; do
+    if [ -r "$module" ]; then
+      # Carrega o módulo
+      source "$module"
+    fi
+  done
 
-    # Limpa a variável do loop
-    unset module
+  # Limpa a variável do loop
+  unset module
 fi
 
 unset BASH_CONFIG_DIR

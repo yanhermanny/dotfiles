@@ -8,9 +8,9 @@
 # bash-completion
 # ==============================================================================
 if [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
+  . /etc/bash_completion
 elif [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
+  . /usr/share/bash-completion/bash_completion
 fi
 
 # ==============================================================================
@@ -23,8 +23,8 @@ HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/bash/bash_history"
 # Garante que diretório e arquivo existam
 mkdir -p "$(dirname "$HISTFILE")"
 if [[ ! -f "$HISTFILE" ]]; then
-    touch "$HISTFILE"
-    chmod 600 "$HISTFILE"
+  touch "$HISTFILE"
+  chmod 600 "$HISTFILE"
 fi
 
 # ---- Comportamento do histórico ----------------------------------------------
@@ -34,9 +34,11 @@ shopt -s histappend
 
 # Sincroniza histórico entre sessões (append + reload)
 if [[ -n "$PROMPT_COMMAND" ]]; then
-    PROMT_COMMAND='history -a; history -n; '"$PROMPT_COMMAND"
+  if [[ "$PROMPT_COMMAND" != *"history -a; history -n"* ]]; then
+    PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
+  fi
 else
-    PROMPT_COMMAND='history -a; history -n'
+  PROMPT_COMMAND="history -a; history -n"
 fi
 
 # Tamanho do histórico

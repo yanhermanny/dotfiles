@@ -5,100 +5,39 @@
 # --------------------------------------------------------------------------------
 
 # ==============================================================================
-# Helpers
-# ==============================================================================
-{{- if .system.is_windows }}
-
-# Converte caminhos do Windows para formato Unix
-_win_to_unix_path() {
-  local input="$1"
-  local expanded="$input"
-
-  # Expande variáveis de ambiente no formato %VAR%
-  while [[ "$expanded" =~ %([^%]+)% ]]; do
-    local var="${BASH_REMATCH[1]}"
-    local value="${!var}"
-
-    if [[ -z "$value" ]]; then
-      value="$(cmd.exe /C "echo %$var%" 2>/dev/null | tr -d '\r')"
-    fi
-
-    expanded="${expanded//%$var%/$value}"
-  done
-
-  cygpath -u "$expanded"
-}
-
-# Adiciona caminho ao PATH (normalizando e evitando duplicados)
-_add_to_path() {
-  local input="$1"
-  local new
-
-  new="$(_win_to_unix_path "$input")"
-  new="$(realpath -m "$new" 2>/dev/null || echo "$new")"
-
-  local IFS=':'
-  local -a parts=($PATH)
-  local -a filtered=()
-
-  for p in "${parts[@]}"; do
-    [[ -z "$p" ]] && continue
-
-    local p_unix
-    p_unix="$(_win_to_unix_path "$p")"
-
-    local resolved
-    resolved="$(realpath -m "$p_unix" 2>/dev/null || echo "$p_unix")"
-
-    if [[ "$resolved" != "$new" ]]; then
-      filtered+=("$p_unix")
-    fi
-  done
-
-  PATH="$new"
-  for p in "${filtered[@]}"; do
-    PATH="$PATH:$p"
-  done
-
-  export PATH
-}
-{{- else }}
-
-# Adiciona caminho ao PATH (evitando duplicados)
-_add_to_path() {
-  local dir="$1"
-  if [[ -d "$dir" && ":$PATH:" != *":$dir:"* ]]; then
-    export PATH="$dir:$PATH"
-  fi
-}
-{{- end }}
-
-# ==============================================================================
 # XDG Base Directories
 # ==============================================================================
 
 {{- if .system.is_windows }}
-XDG_CONFIG_HOME="$(_win_to_unix_path "${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}")"
-XDG_BIN_HOME="$(_win_to_unix_path "${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}")"
-XDG_DATA_HOME="$(_win_to_unix_path "${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}")"
-XDG_STATE_HOME="$(_win_to_unix_path "${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}")"
+export XDG_CONFIG_HOME="$(win_to_unix_path "${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}")"
+export XDG_BIN_HOME="$(win_to_unix_path "${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}")"
+export XDG_LIB_HOME="$(win_to_unix_path "${XDG_LIB_HOME:-{{ .env.xdg_lib_home }}}")"
+export XDG_DATA_HOME="$(win_to_unix_path "${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}")"
+export XDG_STATE_HOME="$(win_to_unix_path "${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}")"
 {{- else }}
-XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
-XDG_BIN_HOME="${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}"
-XDG_DATA_HOME="${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}"
-XDG_STATE_HOME="${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
+export XDG_BIN_HOME="${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}"
+export XDG_LIB_HOME="${XDG_LIB_HOME:-{{ .env.xdg_lib_home }}}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}"
 {{- end }}
 
-export XDG_CONFIG_HOME
-export XDG_BIN_HOME
-export XDG_DATA_HOME
-export XDG_STATE_HOME
-
 # Garante existência dos diretórios
-mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_LIB_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
 
-# Binários do usuário no PATH
-_add_to_path "$XDG_BIN_HOME"
+# ==============================================================================
+# Source PATH utilities library
+# ==============================================================================
+PATH_UTILS_LIB="$XDG_LIB_HOME/bash/path_utils.sh"
+if [[ -f "$PATH_UTILS_LIB" ]]; then
+  source "$PATH_UTILS_LIB"
+else
+  echo "❌ PATH utilities library not found: $PATH_UTILS_LIB"
+  exit 1
+fi
+
+# ---- adiciona binários do usuário no PATH ------------------------------------
+add_to_path "$XDG_BIN_HOME"
 
 # ==============================================================================
 # Variáveis gerais de ambiente
@@ -130,7 +69,7 @@ export LESSHISTFILE=-
 export MSYS="winsymlinks:native"
 
 # Usa OpenSSH nativo do Windows
-_add_to_path "/c/Windows/System32/OpenSSH"
+add_to_path "/c/Windows/System32/OpenSSH"
 {{- end }}
 
 # ==============================================================================
@@ -147,22 +86,22 @@ fi
 
 # ---- pyenv -------------------------------------------------------------------
 {{- if .system.is_windows }}
-export PYENV_ROOT="$(_win_to_unix_path "${PYENV_ROOT:-$XDG_DATA_HOME/pyenv/pyenv-win}")"
+export PYENV_ROOT="$(win_to_unix_path "${PYENV_ROOT:-$XDG_DATA_HOME/pyenv/pyenv-win}")"
 export PYENV="$PYENV_ROOT"
 export PYENV_HOME="$PYENV_ROOT"
 
-[[ -d $PYENV_ROOT/bin ]] && _add_to_path "$PYENV_ROOT/bin"
-[[ -d $PYENV_ROOT/shims ]] && _add_to_path "$PYENV_ROOT/shims"
+[[ -d $PYENV_ROOT/bin ]] && add_to_path "$PYENV_ROOT/bin"
+[[ -d $PYENV_ROOT/shims ]] && add_to_path "$PYENV_ROOT/shims"
 {{- else }}
 export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
-[[ -d $PYENV_ROOT/bin ]] && _add_to_path "$PYENV_ROOT/bin"
+[[ -d $PYENV_ROOT/bin ]] && add_to_path "$PYENV_ROOT/bin"
 eval "$(pyenv init - bash)"
 {{- end }}
 
 # ---- pipx --------------------------------------------------------------------
 {{- if .system.is_windows }}
-export PIPX_HOME="$(_win_to_unix_path "${PIPX_HOME:-$XDG_DATA_HOME/pipx}")"
-export PIPX_BIN_DIR="$(_win_to_unix_path "${PIPX_BIN_DIR:-$XDG_BIN_HOME}")"
+export PIPX_HOME="$(win_to_unix_path "${PIPX_HOME:-$XDG_DATA_HOME/pipx}")"
+export PIPX_BIN_DIR="$(win_to_unix_path "${PIPX_BIN_DIR:-$XDG_BIN_HOME}")"
 {{- else }}
 export PIPX_HOME="$XDG_DATA_HOME/pipx"
 export PIPX_BIN_DIR="$XDG_BIN_HOME"
@@ -170,15 +109,12 @@ export PIPX_BIN_DIR="$XDG_BIN_HOME"
 
 # ---- bat ---------------------------------------------------------------------
 {{- if .system.is_windows }}
-export BAT_CONFIG_DIR="$(_win_to_unix_path "${BAT_CONFIG_DIR:-$XDG_CONFIG_HOME/bat}")"
+export BAT_CONFIG_DIR="$(win_to_unix_path "${BAT_CONFIG_DIR:-$XDG_CONFIG_HOME/bat}")"
 {{- else }}
 export BAT_CONFIG_DIR="$XDG_CONFIG_HOME/bat"
 {{- end }}
 
 # ==============================================================================
-# Limpeza (helpers temporários)
+# Limpeza
 # ==============================================================================
-{{ if .system.is_windows -}}
-unset -f _win_to_unix_path
-{{ end -}}
-unset -f _add_to_path
+unset -v PATH_UTILS_LIB

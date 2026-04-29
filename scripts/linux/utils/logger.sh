@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 # --------------------------------------------------------------------------------
-# Utilitários
+# Logger
 # --------------------------------------------------------------------------------
-
-set -euo pipefail
-
-# ==============================================================================
-# Log
-# ==============================================================================
 
 # ---- colors ------------------------------------------------------------------
 readonly COLOR_DEFAULT="0;37"
@@ -19,7 +13,7 @@ readonly COLOR_GREEN="0;32"
 readonly COLOR_YELLOW="0;33"
 readonly COLOR_BRIGHT_YELLOW="1;33"
 
-# ---- log functions -----------------------------------------------------------
+# ---- core log function -------------------------------------------------------
 _log_color() {
   local color_code="$1"
   shift
@@ -50,63 +44,64 @@ _log_color() {
   fi
 }
 
-log() {
+# ---- semantic log functions --------------------------------------------------
+_log_normal() {
   _log_color "0;37" "$@"
 }
 
-log_info() {
+_log_info() {
   _log_color "$COLOR_BLUE" "ℹ️" "$@"
 }
 
-log_task() {
+_log_task() {
   _log_color "$COLOR_CYAN" "🔃" "$@"
 }
 
-log_warning() {
+_log_warning() {
   _log_color "$COLOR_YELLOW" "⚠️" "$@"
 }
 
-log_error() {
+_log_error() {
   _log_color "$COLOR_RED" "❌" "$@"
 }
 
-log_success() {
+_log_success() {
   _log_color "$COLOR_GREEN" "✅" "$@"
 }
 
-log_comment() {
+_log_comment() {
   _log_color "$COLOR_GRAY" "$@"
 }
 
-log_command() {
+_log_command() {
   _log_color "$COLOR_BRIGHT_YELLOW" "👉" "$@"
 }
 
-# ==============================================================================
-# Sudo
-# ==============================================================================
-sudo() {
-  local exec=false
-  if [[ "$1" == "exec" ]]; then
-    shift
-    exec=true
-  fi
+# ---- log function ------------------------------------------------------------
+log() {
+  local message=""
+  local level=""
 
-  if [[ "$(id -u)" -eq 0 ]]; then
-    if [[ "${exec}" == true ]]; then
-      exec "$@"
-    else
-      "$@"
-    fi
-  else
-    if ! command sudo --non-interactive true 2>/dev/null; then
-      log_warning "Root privileges are required, please enter your password below"
-      command sudo --validate
-    fi
-    if [[ "${exec}" == true ]]; then
-      exec sudo "$@"
-    else
-      command sudo "$@"
-    fi
-  fi
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -l|--level) level="$2"; shift 2 ;;
+      --level=*) level="${1#*=}"; shift ;;
+      -*) _log_error "-bash: log: $1: invalid option"; _log_error "log: usage: log "message" [--level <level>]"; return 1 ;;
+      *) message="$1"; shift ;;
+    esac
+  done
+
+  level="${level,,}"
+
+  case "$level" in
+    info)    _log_info "$message" ;;
+    task)    _log_task "$message" ;;
+    warning) _log_warning "$message" ;;
+    error)   _log_error "$message" ;;
+    success) _log_success "$message" ;;
+    comment) _log_comment "$message" ;;
+    command) _log_command "$message" ;;
+    "" )     _log_normal "$message" ;;
+    *)       _log_error "function log: invalid log level: [$level]"; return 1 ;;
+  esac
 }

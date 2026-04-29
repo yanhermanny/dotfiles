@@ -15,7 +15,7 @@
 # -A : inclui arquivos ocultos (exceto . e ..)
 # -l : formato detalhado
 
-{{- if not .system.is_windows }}
+{{- if .system.is_windows }}
 
 # Exclusões específicas do Windows
 LS_EXCLUSIONS="-I desktop.ini"
@@ -62,7 +62,7 @@ alias cat='bat --paging=never'
 # Usa delta no lugar de diff
 alias diff="delta"
 
-{{- if not .system.is_windows }}
+{{- if .system.is_windows }}
 
 # ==============================================================================
 # Ajustes específicos do Windows
