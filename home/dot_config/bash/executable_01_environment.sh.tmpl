@@ -5,29 +5,9 @@
 # --------------------------------------------------------------------------------
 
 # ==============================================================================
-# XDG Base Directories
-# ==============================================================================
-
-{{- if .system.is_windows }}
-export XDG_CONFIG_HOME="$(win_to_unix_path "${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}")"
-export XDG_BIN_HOME="$(win_to_unix_path "${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}")"
-export XDG_LIB_HOME="$(win_to_unix_path "${XDG_LIB_HOME:-{{ .env.xdg_lib_home }}}")"
-export XDG_DATA_HOME="$(win_to_unix_path "${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}")"
-export XDG_STATE_HOME="$(win_to_unix_path "${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}")"
-{{- else }}
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
-export XDG_BIN_HOME="${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}"
-export XDG_LIB_HOME="${XDG_LIB_HOME:-{{ .env.xdg_lib_home }}}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}"
-{{- end }}
-
-# Garante existência dos diretórios
-mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_LIB_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
-
-# ==============================================================================
 # Source PATH utilities library
 # ==============================================================================
+XDG_LIB_HOME="${XDG_LIB_HOME:-{{ .env.xdg_lib_home }}}"
 PATH_UTILS_LIB="$XDG_LIB_HOME/bash/path_utils.sh"
 if [[ -f "$PATH_UTILS_LIB" ]]; then
   source "$PATH_UTILS_LIB"
@@ -35,6 +15,27 @@ else
   echo "❌ PATH utilities library not found: $PATH_UTILS_LIB"
   exit 1
 fi
+
+# ==============================================================================
+# XDG Base Directories
+# ==============================================================================
+
+{{- if .system.is_windows }}
+export XDG_CONFIG_HOME="$(win_to_unix_path "${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}")"
+export XDG_BIN_HOME="$(win_to_unix_path "${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}")"
+export XDG_LIB_HOME="$(win_to_unix_path "$XDG_LIB_HOME")"
+export XDG_DATA_HOME="$(win_to_unix_path "${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}")"
+export XDG_STATE_HOME="$(win_to_unix_path "${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}")"
+{{- else }}
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
+export XDG_BIN_HOME="${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}"
+export XDG_LIB_HOME
+export XDG_DATA_HOME="${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}"
+{{- end }}
+
+# ---- Garante existência dos diretórios ---------------------------------------
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_LIB_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
 
 # ---- adiciona binários do usuário no PATH ------------------------------------
 add_to_path "$XDG_BIN_HOME"

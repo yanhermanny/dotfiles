@@ -3,7 +3,7 @@ chezmoi:template:missing-key=invalid
 
 # ---- Importando utils libraries --------------------------------------------
 if (-not (Get-Module -Name Logger)) {
-    Import-Module "{{ joinPath .chezmoi.workingTree "scripts/windows/Logger.psm1" }}"
+    Import-Module "{{ joinPath .chezmoi.workingTree "scripts/windows/utils/Logger.psm1" }}"
 }
 
 # ==============================================================================
