@@ -24,7 +24,7 @@ else
 fi
 
 if [[ -z "$executable" ]]; then
-  log_error "chezmoi not found"
+  log "chezmoi not found" --level ERROR
   exit 1
 fi
 

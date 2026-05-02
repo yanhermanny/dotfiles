@@ -7,7 +7,7 @@
 [[ -n "${__BASH_UTILS_SH_LOADED:-}" ]] && return
 readonly __BASH_UTILS_SH_LOADED=1
 
-# ---- source logger library -------------------------------------------------
+# ---- source logger library ---------------------------------------------------
 LOGGER_LIB="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/logger.sh"
 if [[ ! -f "$LOGGER_LIB" ]]; then
   printf "\033[%sm%s\033[0m\n" "1;31" "❌ Required library not found: $LOGGER_LIB" >&2
@@ -31,7 +31,7 @@ sudo() {
     fi
   else
     if ! command sudo --non-interactive true 2>/dev/null; then
-      log_warning "Root privileges are required, please enter your password below"
+      log "Root privileges are required, please enter your password below" --level WARNING
       command sudo --validate
     fi
     if [[ "${exec}" == true ]]; then
