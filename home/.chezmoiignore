@@ -10,5 +10,7 @@ Documents/
 
 {{- if not (or .system.is_linux .system.is_wsl) }}
 .chezmoiscripts/linux/**
+.local/bin/rootmoi
+.config/rootmoi/
 .hushlogin
 {{- end }}

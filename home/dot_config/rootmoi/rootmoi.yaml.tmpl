@@ -1,0 +1,59 @@
+# ~/.config/rootmoi/rootmoi.yaml
+# ---------------------------------------------------------------------
+# Configuração principal do rootmoi.
+# ---------------------------------------------------------------------
+{{- $isLinux := eq .chezmoi.os "linux" }}
+{{- $isWSL := (and $isLinux (.chezmoi.kernel.osrelease | lower | contains "microsoft")) }}
+{{- $isWorkMachine := eq .chezmoi.hostname "VDICOR1W53-44" }}
+{{- $xdgConfig := or (env "XDG_CONFIG_HOME") (joinPath .chezmoi.homeDir ".config") }}
+{{- $xdgBin := or (env "XDG_BIN_HOME") (joinPath .chezmoi.homeDir ".local" "bin") }}
+{{- $xdgLib := or (env "XDG_LIB_HOME") (joinPath .chezmoi.homeDir ".local" "lib") }}
+{{- $xdgData := or (env "XDG_DATA_HOME") (joinPath .chezmoi.homeDir ".local" "share") }}
+{{- $xdgState := or (env "XDG_STATE_HOME") (joinPath .chezmoi.homeDir ".local" "state") }}
+{{- $xdgCache := or (env "XDG_CACHE_HOME") (joinPath .chezmoi.homeDir ".cache") }}
+
+# Diretório-fonte dos dotfiles gerenciados pelo chezmoi
+{{- $sourceDir := joinPath .chezmoi.workingTree "root" }}
+sourceDir: "{{ $sourceDir }}"
+
+# Diretório de destino dos arquivos aplicados
+destDir: "/"
+
+cd:
+  command: bash
+
+# Modo padrão
+mode: file
+
+# Editor integrado
+edit:
+  apply: true
+  watch: true
+
+# Atualização automática de templates e dotfiles
+update:
+  apply: true
+
+# Exibe diffs com 'delta'
+diff:
+  pager: delta
+
+# Dados customizados disponíveis para outros templates
+data:
+  name: "Yan Hermanny"
+  email: "{{ if $isWorkMachine }}yan.hermanny@b3.com.br{{ else }}88159884+yanhermanny@users.noreply.github.com{{ end }}"
+  github_user: "{{ if $isWorkMachine }}yhermanny{{ else }}yanhermanny{{ end }}"
+
+  system:
+    os: "{{ .chezmoi.os }}"
+    hostname: "{{ .chezmoi.hostname }}"
+    is_linux: {{ $isLinux }}
+    is_wsl: {{ $isWSL }}
+    is_work_machine: {{ $isWorkMachine }}
+  env:
+    xdg_config_home: "{{ $xdgConfig }}"
+    xdg_bin_home: "{{ $xdgBin }}"
+    xdg_lib_home: "{{ $xdgLib }}"
+    xdg_data_home: "{{ $xdgData }}"
+    xdg_state_home: "{{ $xdgState }}"
+    xdg_cache_home: "{{ $xdgCache }}"

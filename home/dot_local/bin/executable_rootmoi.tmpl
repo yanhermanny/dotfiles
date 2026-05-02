@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+# ---- source utils libraries -------------------------------------------------
+UTILS_LIB="{{ joinPath .chezmoi.workingTree "scripts/linux/utils/bash_utils.sh" }}"
+LOGGER_LIB="{{ joinPath .chezmoi.workingTree "scripts/linux/utils/logger.sh" }}"
+for lib in "$UTILS_LIB" "$LOGGER_LIB"; do
+  if [[ ! -f "$lib" ]]; then
+    printf "\033[%sm%s\033[0m\n" "1;31" "❌ Required library not found: $lib" >&2
+    exit 1
+  fi
+done
+source "$UTILS_LIB"
+source "$LOGGER_LIB"
+
+# ==============================================================================
+# ROOTMOI
+# ==============================================================================
+
+# ---- define executável do chezmoi --------------------------------------------
+if [[ -x "{{ .chezmoi.executable }}" ]]; then
+  executable="{{ .chezmoi.executable }}"
+else
+  executable="$(command -v chezmoi || true)"
+fi
+
+if [[ -z "$executable" ]]; then
+  log_error "chezmoi not found"
+  exit 1
+fi
+
+# ---- caminhos do rootmoi -----------------------------------------------------
+configDir="{{ joinPath .env.xdg_config_home "rootmoi" }}"
+configFile="{{ joinPath "$configDir" "rootmoi.yaml" }}"
+persistentStateFile="{{ joinPath "$configDir" "rootmoistate.boltdb" }}"
+cacheDir="{{ joinPath .env.xdg_cache_home "rootmoi" }}"
+
+# ---- cria diretórios necessários como user -----------------------------------
+mkdir -p "$configDir" "$cacheDir"
+
+# ---- define PATH do user para o root -----------------------------------------
+# Isso é necessário para garantir que o rootmoi tenha acesso às mesmas ferramentas do user
+env_args=(env "PATH=${PATH}")
+if [[ "${DOTFILES_TEST:-}" == true ]]; then
+  env_args+=("DOTFILES_TEST=true")
+fi
+
+# ---- executa o rootmoi com sudo ----------------------------------------------
+sudo exec "${env_args[@]}" \
+  "${executable}" "$@" \
+  --config="$configFile" \
+  --persistent-state="$persistentStateFile" \
+  --cache="$cacheDir"
