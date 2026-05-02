@@ -1,0 +1,74 @@
+{{- if .system.is_wsl -}}
+#!/usr/bin/env sh
+# ~/.config/bash/05_ssh_agent.sh
+# --------------------------------------------------------------------------------
+# Integração com o ssh-agent do Windows no WSL
+# --------------------------------------------------------------------------------
+#
+# Requisitos:
+#   - socat instalado no WSL
+#   - npiperelay.exe disponível no Windows
+#
+# O objetivo é expor o ssh-agent do Windows através de um socket Unix
+# dentro do WSL, permitindo reutilizar as mesmas chaves já carregadas
+# no Windows sem precisar redigitar a passphrase.
+# -----------------------------------------------------------------------------
+if [ -n "{{ .system.is_wsl }}" ]; then
+  # Socket Unix utilizado pelo OpenSSH dentro do WSL.
+  export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/1000}/ssh-agent.sock"
+
+  _setup_windows_known_hosts() {
+    local win_known_hosts
+    win_known_hosts="$(wslpath 'C:\Users\yanhermanny\.ssh\known_hosts')"
+
+    mkdir -p "$HOME/.ssh"
+
+    # Se já existir um symlink válido, reutiliza.
+    if [ -L "$HOME/.ssh/known_hosts" ] &&
+       [ "$(readlink -f "$HOME/.ssh/known_hosts")" = "$win_known_hosts" ]; then
+      return 0
+    fi
+
+    # Se existir arquivo ou link incorreto, remove.
+    if [ -e "$HOME/.ssh/known_hosts" ] || [ -L "$HOME/.ssh/known_hosts" ]; then
+      rm -f "$HOME/.ssh/known_hosts"
+    fi
+
+    # Cria o link simbólico para o known_hosts do Windows.
+    ln -sf "$win_known_hosts" "$HOME/.ssh/known_hosts"
+  }
+
+  _start_windows_ssh_agent_bridge() {
+    local relay="$(wslpath -a C:/Users/$USER/AppData/Local/Microsoft/WinGet/Links/npiperelay.exe)"
+
+    # Se o binário do bridge não existir, não faz nada.
+    [ -x "$relay" ] || return 0
+
+    # Se já existir um socket funcional, reutiliza.
+    if [ -S "$SSH_AUTH_SOCK" ] && ssh-add -l >/dev/null 2>&1; then
+      return 0
+    fi
+
+    # Remove socket órfão ou inválido.
+    rm -f "$SSH_AUTH_SOCK"
+
+    # Cria o bridge em background.
+    #
+    # O socat expõe um socket Unix no WSL e encaminha as chamadas
+    # para o named pipe do ssh-agent do Windows.
+    (
+      setsid socat \
+        UNIX-LISTEN:"$SSH_AUTH_SOCK",fork \
+        EXEC:"$relay -ei -s //./pipe/openssh-ssh-agent" \
+        >/dev/null 2>&1 &
+    )
+  }
+
+  _setup_windows_known_hosts
+  _start_windows_ssh_agent_bridge
+
+  # Remove as funções do ambiente após o bootstrap.
+  unset -f _setup_windows_known_hosts
+  unset -f _start_windows_ssh_agent_bridge
+fi
+{{- end -}}
