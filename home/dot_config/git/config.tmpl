@@ -37,4 +37,4 @@
   process = git-lfs filter-process
   required = true
 [include]
-  path = {{ .env.xdg_config_home }}/delta/delta.gitconfig
+  path = {{ joinPath .env.xdg_config_home "delta" "delta.gitconfig" | replace "\\" "/" }}
