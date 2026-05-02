@@ -3,6 +3,18 @@
 # Utilitários
 # --------------------------------------------------------------------------------
 
+# ---- source guard ------------------------------------------------------------
+[[ -n "${__BASH_UTILS_SH_LOADED:-}" ]] && return
+readonly __BASH_UTILS_SH_LOADED=1
+
+# ---- source logger library -------------------------------------------------
+LOGGER_LIB="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/logger.sh"
+if [[ ! -f "$LOGGER_LIB" ]]; then
+  printf "\033[%sm%s\033[0m\n" "1;31" "❌ Required library not found: $LOGGER_LIB" >&2
+  exit 1
+fi
+source "$LOGGER_LIB"
+
 # ---- wraper para sudo --------------------------------------------------------
 sudo() {
   local exec=false

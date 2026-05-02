@@ -11,16 +11,19 @@
 {{- $xdgLib := or (env "XDG_LIB_HOME") (joinPath .chezmoi.homeDir ".local" "lib") }}
 {{- $xdgData := or (env "XDG_DATA_HOME") (joinPath .chezmoi.homeDir ".local" "share") }}
 {{- $xdgState := or (env "XDG_STATE_HOME") (joinPath .chezmoi.homeDir ".local" "state") }}
+{{- $xdgCache := or (env "XDG_CACHE_HOME") (joinPath .chezmoi.homeDir ".cache") }}
 
 # Diretório-fonte dos dotfiles gerenciados pelo chezmoi
-sourceDir: "{{ .chezmoi.homeDir }}/.local/share/chezmoi"
+sourceDir: "{{ .chezmoi.workingTree }}"
 
 # Diretório de destino dos arquivos aplicados
 destDir: "{{ .chezmoi.homeDir }}"
 
 cd:
   command: {{ if $isWindows }}pwsh{{ else }}bash{{ end }}
-  {{ if $isWindows }}args: -NoLogo{{ end }}
+  {{- if $isWindows }}
+  args: -NoLogo
+  {{- end }}
 
 # Modo padrão
 mode: file
@@ -52,8 +55,9 @@ data:
     is_wsl: {{ $isWSL }}
     is_work_machine: {{ $isWorkMachine }}
   env:
-    xdg_config_home: '{{ $xdgConfig }}'
-    xdg_bin_home: '{{ $xdgBin }}'
-    xdg_lib_home: '{{ $xdgLib }}'
-    xdg_data_home: '{{ $xdgData }}'
-    xdg_state_home: '{{ $xdgState }}'
+    xdg_config_home: "{{ $xdgConfig }}"
+    xdg_bin_home: "{{ $xdgBin }}"
+    xdg_lib_home: "{{ $xdgLib }}"
+    xdg_data_home: "{{ $xdgData }}"
+    xdg_state_home: "{{ $xdgState }}"
+    xdg_cache_home: "{{ $xdgCache }}"

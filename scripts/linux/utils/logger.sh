@@ -3,6 +3,10 @@
 # Logger
 # --------------------------------------------------------------------------------
 
+# ---- source guard ------------------------------------------------------------
+[[ -n "${__LOGGER_SH_LOADED:-}" ]] && return
+readonly __LOGGER_SH_LOADED=1
+
 # ---- colors ------------------------------------------------------------------
 readonly COLOR_DEFAULT="0;37"
 readonly COLOR_GRAY="0;90"
@@ -46,7 +50,7 @@ _log_color() {
 
 # ---- semantic log functions --------------------------------------------------
 _log_normal() {
-  _log_color "0;37" "$@"
+  _log_color "$COLOR_DEFAULT" "$@"
 }
 
 _log_info() {
