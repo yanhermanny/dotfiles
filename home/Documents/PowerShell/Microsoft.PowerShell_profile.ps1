@@ -14,26 +14,26 @@ $ErrorActionPreference = "Stop"
 # ==============================================================================
 
 if (-not $env:XDG_CONFIG_HOME) {
-    $env:XDG_CONFIG_HOME = Join-Path $HOME ".config"
+  $env:XDG_CONFIG_HOME = Join-Path $HOME ".config"
 }
 
 if (-not $env:XDG_DATA_HOME) {
-    $env:XDG_DATA_HOME = Join-Path $HOME ".local" "share"
+  $env:XDG_DATA_HOME = Join-Path $HOME ".local" "share"
 }
 
 if (-not $env:XDG_STATE_HOME) {
-    $env:XDG_STATE_HOME = Join-Path $HOME ".local" "state"
+  $env:XDG_STATE_HOME = Join-Path $HOME ".local" "state"
 }
 
 if (-not $env:XDG_BIN_HOME) {
-    $env:XDG_BIN_HOME = Join-Path $HOME ".local" "bin"
+  $env:XDG_BIN_HOME = Join-Path $HOME ".local" "bin"
 }
 
 # Adiciona XDG_BIN_HOME ao PATH se não estiver presente
 if (Test-Path $env:XDG_BIN_HOME) {
-    if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $env:XDG_BIN_HOME })) {
-        $env:PATH = "$env:XDG_BIN_HOME;$env:PATH"
-    }
+  if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $env:XDG_BIN_HOME })) {
+    $env:PATH = "$env:XDG_BIN_HOME;$env:PATH"
+  }
 }
 
 # ==============================================================================
@@ -70,14 +70,14 @@ $xdgScripts = Join-Path $env:XDG_DATA_HOME "powershell" "scripts"
 
 # Garante que os diretórios existam
 foreach ($dir in @($xdgModules, $xdgScripts)) {
-    if (-not (Test-Path $dir)) {
-        New-Item -ItemType Directory -Force -Path $dir | Out-Null
-    }
+  if (-not (Test-Path $dir)) {
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+  }
 }
 
 # Adiciona o diretório de scripts ao PATH se não estiver presente
 if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $xdgScripts })) {
-    $env:PATH = "$xdgScripts;$env:PATH"
+  $env:PATH = "$xdgScripts;$env:PATH"
 }
 
 # ==============================================================================
@@ -85,18 +85,18 @@ if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $xdgScripts })) {
 # ==============================================================================
 
 if (-not ($env:PSModulePath -split ";" | Where-Object { $_ -eq $xdgModules })) {
-    $env:PSModulePath = "$xdgModules;$env:PSModulePath"
+  $env:PSModulePath = "$xdgModules;$env:PSModulePath"
 }
 
 # ==============================================================================
 # Histórico (XDG_STATE)
 # ==============================================================================
 
-$historyDir  = Join-Path $env:XDG_STATE_HOME "powershell"
+$historyDir = Join-Path $env:XDG_STATE_HOME "powershell"
 $historyFile = Join-Path $historyDir "history.txt"
 
 if (-not (Test-Path $historyDir)) {
-    New-Item -ItemType Directory -Force -Path $historyDir | Out-Null
+  New-Item -ItemType Directory -Force -Path $historyDir | Out-Null
 }
 
 Set-PSReadLineOption -HistorySavePath $historyFile
@@ -110,11 +110,12 @@ Set-PSReadLineOption -HistoryNoDuplicates
 
 # ---- WinGet CommandNotFound --------------------------------------------------
 if (Get-Module -ListAvailable -Name Microsoft.WinGet.CommandNotFound) {
-    try {
-        Import-Module Microsoft.WinGet.CommandNotFound -ErrorAction Stop
-    } catch {
-        Write-Verbose "Falha ao carregar Microsoft.WinGet.CommandNotFound"
-    }
+  try {
+    Import-Module Microsoft.WinGet.CommandNotFound -ErrorAction Stop
+  }
+  catch {
+    Write-Verbose "Falha ao carregar Microsoft.WinGet.CommandNotFound"
+  }
 }
 
 # ==============================================================================
@@ -123,11 +124,12 @@ if (Get-Module -ListAvailable -Name Microsoft.WinGet.CommandNotFound) {
 
 # ---- fnm ---------------------------------------------------------------------
 if (Get-Command fnm -ErrorAction SilentlyContinue) {
-    try {
-        fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
-    } catch {
-        Write-Warning "Falha ao inicializar fnm"
-    }
+  try {
+    fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
+  }
+  catch {
+    Write-Warning "Falha ao inicializar fnm"
+  }
 }
 
 # ==============================================================================
@@ -136,8 +138,8 @@ if (Get-Command fnm -ErrorAction SilentlyContinue) {
 
 # Ctrl+L → limpa a tela
 Set-PSReadLineKeyHandler -Key Ctrl+l -ScriptBlock {
-    [Microsoft.PowerShell.PSConsoleReadLine]::ClearScreen()
-    Write-Host "`e[3J" -NoNewline   # Limpa o scrollback (buffer do terminal)
+  [Microsoft.PowerShell.PSConsoleReadLine]::ClearScreen()
+  Write-Host "`e[3J" -NoNewline   # Limpa o scrollback (buffer do terminal)
 }
 
 # ==============================================================================

@@ -25,7 +25,7 @@ A estrutura dentro de `~/.local/share/chezmoi/` é a seguinte:
 
 ```text
 ~/.local/share/chezmoi/
-├── dotfiles/
+├── home/
 │   ├── .chezmoi.yaml.tmpl        # Template da configuração do próprio chezmoi
 │   ├── .chezmoiignore            # Regras de ignorados
 │   ├── dot_bashrc
@@ -34,15 +34,18 @@ A estrutura dentro de `~/.local/share/chezmoi/` é a seguinte:
 │   ├── remove_dot_bash_login
 │   ├── remove_dot_bash_profile
 │   ├── .chezmoidata/
-│   │   ├── linux/
-│   │   │   └── packages.yaml         # Arquivo declarativo com listas de pacotes do Linux
-│   │   └── windows/
-│   │       └── packages.yaml         # Arquivo declarativo com listas de pacotes do Windows
+│   │   └── packages.yaml         # Arquivo declarativo com listas de pacotes do Linux
 │   ├── .chezmoiscripts/
 │   │   ├── linux/
 │   │   │   └── run_onchange_before_install-packages.sh.tmpl    # Script que instala pacotes no Linux
 │   │   └── windows/
 │   │       └── run_onchange_before_install-packages.ps1.tmpl   # Script que instala pacotes no Windows
+│   ├── AppData/
+│   │   └── Roaming
+│   │       └── Code
+│   │           └── User
+│   │               ├── private_settings.json
+│   │               └── private_keybindings.json
 │   └── dot_config/
 │       ├── bash/
 │       │   ├── executable_01_environment.sh.tmpl

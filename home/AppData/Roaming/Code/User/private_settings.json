@@ -1,0 +1,485 @@
+{
+  // ===========================================================================
+  // CONFIGURAÇÕES GLOBAIS DO VSCODE
+  // ===========================================================================
+
+  // ---- telemetria e segurança -----------------------------------------------
+  "telemetry.telemetryLevel": "off",
+  "redhat.telemetry.enabled": false,
+  "workbench.enableExperiments": false,
+  "security.workspace.trust.enabled": false,
+  "security.restrictUNCAccess": false,
+  "http.systemCertificatesNode": true,
+
+  // ---- janela e aplicação ---------------------------------------------------
+  "window.enableMenuBarMnemonics": false,
+  "window.restoreWindows": "none",
+  "window.title": "${folderPath}${separator}${activeEditorShort}${separator}${appName}",
+  "window.newWindowDimensions": "maximized",
+
+  // ---- aparêcia e tema ------------------------------------------------------
+  "workbench.colorTheme": "One Dark Pro Darker",
+  "oneDarkPro.italic": false,
+  "workbench.iconTheme": "material-icon-theme",
+  "material-icon-theme.folders.color": "#4169E1",
+  "workbench.colorCustomizations": {
+    "editor.background": "#191D20",
+    "terminal.background": "#191D20",
+    "statusBar.background": "#454545",
+    "statusBar.foreground": "#D0D0D0",
+    "editor.lineHighlightBackground": "#2C313C",
+    "editor.selectionBackground": "#4E4EA0",
+    "editor.selectionHighlightBackground": "#3333BB55",
+    "editor.selectionHighlightBorder": "#888888"
+  },
+
+  // ---- workbench ------------------------------------------------------------
+  "workbench.startupEditor": "none",
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.editor.restoreViewState": false,
+  "workbench.editor.openPositioning": "last",
+  "workbench.editor.enablePreview": true,
+  "workbench.editor.enablePreviewFromCodeNavigation": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.pinnedTabSizing": "compact",
+  "workbench.editor.untitled.labelFormat": "name",
+  "workbench.settings.editor": "json",
+  "workbench.settings.useSplitJSON": false,
+  "workbench.commandPalette.history": 5,
+  "workbench.tree.renderIndentGuides": "always",
+  "workbench.editor.revealIfOpen": true,
+  "workbench.quickOpen.preserveInput": true,
+  "breadcrumbs.enabled": false,
+
+  // ---- explorer -------------------------------------------------------------
+  "explorer.enableDragAndDrop": true,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  "explorer.openEditors.visible": 1,
+  "explorer.openEditors.minVisible": 0,
+  "explorer.autoReveal": false,
+
+  // ---- editor: arquivos ----------------------------------------------------
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "files.simpleDialog.enable": false,
+  "files.autoGuessEncoding": false,
+  "files.encoding": "utf8",
+  "files.associations": {
+    "*.json": "jsonc",
+    "config": "properties",
+    ".*ignore": "ignore"
+  },
+
+  // ---- editor: edição e indentação ------------------------------------------
+  "editor.tabSize": 2,
+  "editor.indentSize": "tabSize",
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.wordWrap": "off",
+  "editor.wordWrapColumn": 150,
+  "editor.rulers": [150],
+  "editor.wrappingIndent": "deepIndent",
+
+  // ---- editor: produtividade e sugestões ------------------------------------
+  "editor.suggestSelection": "first",
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.suggest.insertMode": "replace",
+  "editor.snippetSuggestions": "top",
+  "editor.linkedEditing": true,
+
+  // ---- editor: visualização e comportamento ---------------------------------
+  "editor.formatOnSave": false,
+  "editor.matchBrackets": "always",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.autoClosingBrackets": "beforeWhitespace",
+  "editor.autoClosingQuotes": "beforeWhitespace",
+  "editor.autoSurround": "languageDefined",
+  "editor.cursorBlinking": "expand",
+  "editor.cursorStyle": "line",
+  "editor.dragAndDrop": false,
+  "editor.minimap.enabled": false,
+  "editor.mouseWheelZoom": false,
+  "editor.renderLineHighlight": "all",
+  "editor.renderWhitespace": "selection",
+  "editor.stickyScroll.enabled": false,
+  "editor.scrollBeyondLastLine": true,
+  "editor.occurrencesHighlight": "off",
+  "editor.showFoldingControls": "always",
+  "editor.foldingImportsByDefault": true,
+  "editor.guides.indentation": true,
+  "editor.unicodeHighlight.invisibleCharacters": true,
+  "editor.unicodeHighlight.ambiguousCharacters": true,
+  "editor.colorDecorators": true,
+  "editor.defaultColorDecorators": "always",
+  "editor.colorDecoratorsActivatedOn": "click",
+  "diffEditor.ignoreTrimWhitespace": false,
+
+  // ---- editor: tipografia ---------------------------------------------------
+  "editor.fontFamily": "Cascadia Code",
+  "editor.fontWeight": "350",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 14.5,
+  "editor.lineHeight": 22,
+
+  // ---- busca ----------------------------------------------------------------
+  "editor.find.autoFindInSelection": "multiline",
+  "search.mode": "reuseEditor",
+
+  // ---- zen mode -------------------------------------------------------------
+  "zenMode.hideLineNumbers": false,
+  "zenMode.centerLayout": true,
+  "zenMode.hideStatusBar": false,
+
+  // ---- terminal: comportamento ----------------------------------------------
+  "terminal.explorerKind": "integrated",
+  "terminal.external.windowsExec": "C:\\Program Files\\Git\\bin\\bash.exe -il",
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "terminal.integrated.enablePersistentSessions": false,
+  "terminal.integrated.persistentSessionReviveProcess": "never",
+  "terminal.integrated.hideOnStartup": "always",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "terminal.integrated.rightClickBehavior": "selectWord",
+  "terminal.integrated.tabs.enabled": false,
+  "terminal.integrated.showExitAlert": false,
+
+  // ---- terminal: aparência --------------------------------------------------
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.fontFamily": "Cascadia Code",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontWeight": "400",
+
+  // ---- terminal: perfis windows ---------------------------------------------
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell"
+    },
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
+    },
+    "Git Bash": {
+      "source": "Git Bash",
+      "args": ["-il"]
+    }
+  },
+
+  // ---- debug ----------------------------------------------------------------
+  "debug.openDebug": "openOnDebugBreak",
+  "debug.internalConsoleOptions": "neverOpen",
+  "debug.openExplorerOnEnd": true,
+
+  // ---- chat -----------------------------------------------------------------
+  "chat.viewSessions.orientation": "stacked",
+
+  // ===========================================================================
+  // CONFIGURAÇÕES DE FERRAMENTAS
+  // ===========================================================================
+
+  // ---- controle de versão ---------------------------------------------------
+  "scm.alwaysShowRepositories": true,
+  "scm.autoReveal": false,
+  "scm.diffDecorationsGutterWidth": 2,
+  "git.decorations.enabled": true,
+  "git.autofetch": "all",
+  "git.fetchOnPull": true,
+  "gitlens.defaultDateFormat": "DD MMM YYYY, HH:mm",
+  "gitlens.defaultDateShortFormat": "DD MMM YYYY",
+  "gitlens.defaultTimeFormat": "HH:mm",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+
+  // ---- extension: project manager -------------------------------------------
+  "projectManager.openInCurrentWindowIfEmpty": "always",
+  "projectManager.openInNewWindowWhenClickingInStatusBar": false,
+  "projectManager.filterOnFullPath": true,
+  "projectManager.showParentFolderInfoOnDuplicates": true,
+  "projectManager.ignoreProjectsWithinProjects": false,
+  "projectManager.any.maxDepthRecursion": 1,
+  "projectManager.any.baseFolders": [
+    "/dev/"
+  ],
+
+  // ---- extension: rainbow csv -----------------------------------------------
+  "rainbow_csv.autodetection_min_line_count": 1,
+  "rainbow_csv.rbql_with_headers_by_default": true,
+  "rainbow_csv.enable_sticky_header": false,
+  "rainbow_csv.autodetect_separators": [
+    ";",
+    ","
+  ],
+
+  // ---- extension: todo highlight --------------------------------------------
+  "todohighlight.isEnable": true,
+  "todohighlight.isCaseSensitive": false,
+  "todohighlight.include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.html",
+    "**/*.php",
+    "**/*.css",
+    "**/*.scss",
+    "**/*.py",
+    "**/*.java",
+    "**/*.c",
+    "**/*.cpp"
+  ],
+  "todohighlight.keywords": [
+    {
+      "text": "TODO:",
+      "color": "#000000",
+      "backgroundColor": "#FFD700",
+      "border": "1px solid #FFD700",
+      "borderRadius": "4px"
+    },
+    {
+      "text": "FixMe",
+      "color": "#000000",
+      "backgroundColor": "#FF3232",
+      "border": "1px solid #FF3232",
+      "borderRadius": "4px"
+    }
+  ],
+
+  // ---- extension: path autocomplete -----------------------------------------
+  "path-autocomplete.enableFolderTrailingSlash": true,
+  "path-autocomplete.useBackslash": false,
+  "path-autocomplete.pathMappings": {
+    "\\": "C:\\"
+  },
+
+  // ---- extension: statusbar error -------------------------------------------
+  "statusbarerror.gutter.error.show": true,
+  "statusbarerror.gutter.hint.show": true,
+  "statusbarerror.gutter.warning.show": true,
+  "statusbarerror.gutter.info.show": true,
+  "statusbarerror.statusbar.show": false,
+  "statusbarerror.wholeLine.show": true,
+
+  // ---- extension: shellcheck ------------------------------------------------
+  "shellcheck.enable": true,
+  "shellcheck.run": "onType",
+  "shellcheck.useWorkspaceRootAsCwd": true,
+
+  // ===========================================================================
+  // CONFIGURAÇÕES DE LINGUAGENS ESPECÍFICAS
+  // ===========================================================================
+
+  // ---- java -----------------------------------------------------------------
+  "java.server.launchMode": "Hybrid",
+  "java.import.maven.enabled": true,
+  "java.completion.enabled": true,
+  "java.completion.guessMethodArguments": "insertBestGuessedArguments",
+  "java.completion.importOrder": [
+    "#",
+    "java",
+    "javax",
+    ""
+  ],
+  "java.autobuild.enabled": true,
+  "java.debug.settings.hotCodeReplace": "manual",
+  "java.debug.settings.console": "integratedTerminal",
+  "java.debug.settings.enableRunDebugCodeLens": true,
+  "java.project.explorer.showNonJavaResources": true,
+  "java.project.referencedLibraries": [
+    "lib/**/*.jar"
+  ],
+  "java.dependency.autoRefresh": true,
+  "java.dependency.packagePresentation": "hierarchical",
+  "java.dependency.syncWithFolderExplorer": false,
+  "java.dependency.showMembers": true,
+  "java.codeGeneration.generateComments": false,
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-21",
+      "path": "C:\\java\\jdk-21.0.5\\",
+      "default": true
+    },
+    {
+      "name": "JavaSE-17",
+      "path": "C:\\java\\jdk-17.0.5\\",
+      "default": false
+    }
+  ],
+  "java.referencesCodeLens.enabled": true,
+  "java.jdt.ls.java.home": "C:\\java\\jdk-21.0.5\\",
+  "java.compile.nullAnalysis.mode": "disabled",
+  "java.format.enabled": true,
+
+  // ---- maven ----------------------------------------------------------------
+  "maven.terminal.useJavaHome": true,
+  "maven.executable.path": "C:\\apache-maven\\apache-maven-3.9.9\\bin\\mvn",
+  "maven.executable.preferMavenWrapper": false,
+  "maven.dependency.enableConflictDiagnostics": true,
+
+  // ---- spring ---------------------------------------------------------------
+  "spring.dashboard.openWith": "external",
+  "spring.initializr.defaultLanguage": "Java",
+  "spring.initializr.defaultGroupId": "br.com.hermanny",
+  "spring.initializr.defaultPackaging": "JAR",
+  "spring-boot.ls.problem.version-validation.UPDATE_LATEST_MAJOR_VERSION": "IGNORE",
+  "spring-boot.ls.problem.version-validation.UPDATE_LATEST_MINOR_VERSION": "IGNORE",
+  "spring-boot.ls.problem.version-validation.UPDATE_LATEST_PATCH_VERSION": "IGNORE",
+  "[spring-boot-properties-yaml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+
+  // ---- sql ------------------------------------------------------------------
+  "Prettier-SQL.keywordCase": "upper",
+  "Prettier-SQL.commaPosition": "after",
+  "Prettier-SQL.logicalOperatorNewline": "before",
+  "Prettier-SQL.denseOperators": false,
+  "Prettier-SQL.ignoreTabSettings": true,
+  "Prettier-SQL.insertSpacesOverride": true,
+  "Prettier-SQL.tabSizeOverride": 2,
+  "Prettier-SQL.indentStyle": "standard",
+  "Prettier-SQL.newlineBeforeSemicolon": true,
+  "Prettier-SQL.tabulateAlias": false,
+  "Prettier-SQL.linesBetweenQueries": 1,
+  "Prettier-SQL.SQLFlavourOverride": "mysql",
+  "Prettier-SQL.expressionWidth": 150,
+
+  // ---- xml ------------------------------------------------------------------
+  "xml.codeLens.enabled": false,
+  "xml.downloadExternalResources.enabled": false,
+  "xml.completion.autoCloseTags": true,
+  "xml.format.enabled": true,
+  "xml.format.emptyElements": "collapse",
+  "xml.format.preservedNewlines": 1,
+  "xml.format.spaceBeforeEmptyCloseTag": false,
+  "xml.format.splitAttributes": "preserve",
+  "xml.format.splitAttributesIndentSize": 2,
+  "xml.format.grammarAwareFormatting": false,
+  "xml.format.preserveEmptyContent": false,
+  "xml.format.preserveAttributeLineBreaks": true,
+  "xml.format.xsiSchemaLocationSplit": "onElement",
+  "xml.validation.enabled": true,
+  "xml.validation.namespaces.enabled": "always",
+  "xml.validation.resolveExternalEntities": false,
+  "xml.validation.schema.enabled": "never",
+  "xml.validation.noGrammar": "ignore",
+
+  // ---- yaml -----------------------------------------------------------------
+  "yaml.format.enable": true,
+  "yaml.validate": false,
+  "yaml.schemas": {
+    "http://json.schemastore.org/github-workflow.json": [
+      "*.github/workflows/*.yaml",
+      "*.github/workflows/*.yml"
+    ],
+    "http://json.schemastore.org/github-action.json": [
+      "action.yaml",
+      "action.yml"
+    ]
+  },
+
+  // ---- markdown -------------------------------------------------------------
+  "markdown.validate.enabled": true,
+  "markdown-pdf.executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "markdown-preview-enhanced.previewTheme": "github-dark.css",
+  "markdown-preview-enhanced.codeBlockTheme": "auto.css",
+  "markdown-preview-enhanced.scrollSync": true,
+  "markdown-preview-enhanced.breakOnSingleNewLine": false,
+  "markdown-preview-enhanced.enableEmojiSyntax": true,
+  "markdown-preview-enhanced.enableExtendedTableSyntax": true,
+  "markdown-preview-enhanced.enableCriticMarkupSyntax": false,
+  "markdown-preview-enhanced.enableLinkify": true,
+  "markdown-preview-enhanced.enableWikiLinkSyntax": true,
+  "markdown-preview-enhanced.useGitHubStylePipedLink": false,
+  "markdown-preview-enhanced.previewMode": "Single Preview",
+  "markdownlint.config": {
+    "default": true,
+    "MD003": { "style": "atx" },      // MD003: Força um estilo consistente para cabeçalhos, usando '#' (atx).
+    "MD004": { "style": "dash" },     // MD004: Padroniza o marcador de listas não ordenadas, forçando o uso de '-' (dash).
+    "MD007": { "indent": 2 },         // MD007: Garante que a indentação de sub-listas seja de 2 espaços.
+    "MD012": false,                   // MD012: (Desativado) Permite o uso de múltiplas linhas em branco consecutivas, para maior espaçamento visual.
+    "MD013": false,                   // MD013: (Desativado) Desabilita um limite de caracteres por linha.
+    "MD022": false,                   // MD022: (Desativado) Permite que cabeçalhos não precisem ser cercados por linhas em branco.
+    "MD024": false,                   // MD024: (Desativado) Permite cabeçalhos duplicados, útil para documentos com seções semelhantes.
+    "MD029": { "style": "ordered" },  // MD029: Força a numeração de listas ordenadas de forma incremental (1. 2. 3.).
+    "MD031": false,                   // MD031: (Desativado) Permite que blocos de código não precisem ser cercados por linhas em branco.
+    "MD032": false,                   // MD032: (Desativado) Permite que listas não precisem ser cercadas por linhas em branco.
+    "MD033": false,                   // MD033: (Desativado) Permite o uso de HTML inline, garantindo flexibilidade para elementos complexos.
+    "MD046": { "style": "fenced" },   // MD046: Padroniza o estilo de blocos de código, forçando o uso de '```' (fenced).
+    "MD047": true                     // MD047: Garante que o arquivo termine com uma única linha em branco, seguindo boas práticas do Git.
+  },
+  "[markdown]": {
+    "editor.wordWrap": "bounded",
+    "editor.insertSpaces": true,
+    "editor.indentSize": 2,
+    "editor.detectIndentation": false,
+    "files.trimTrailingWhitespace": true
+  },
+
+  // ---- powershell -----------------------------------------------------------
+  "powershell.scriptAnalysis.enable": true,
+  "powershell.integratedConsole.showOnStartup": false,
+  "powershell.debugging.createTemporaryIntegratedConsole": true,
+  "powershell.codeFormatting.preset": "Custom",
+  "powershell.codeFormatting.openBraceOnSameLine": true,
+  "powershell.codeFormatting.newLineAfterOpenBrace": true,
+  "powershell.codeFormatting.newLineAfterCloseBrace": true,
+  "powershell.codeFormatting.useCorrectCasing": true,
+  "powershell.codeFormatting.autoCorrectAliases": true,
+  "powershell.codeFormatting.trimWhitespaceAroundPipe": true,
+  "powershell.codeFormatting.addWhitespaceAroundPipe": true,
+  "powershell.codeFormatting.ignoreOneLineBlock": true,
+  "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationForFirstPipeline",
+  "powershell.codeFormatting.whitespaceAfterSeparator": true,
+  "powershell.codeFormatting.whitespaceAroundOperator": true,
+  "powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
+  "powershell.codeFormatting.whitespaceBeforeOpenParen": true,
+  "powershell.codeFormatting.whitespaceBetweenParameters": true,
+  "powershell.codeFormatting.whitespaceInsideBrace": true,
+
+  // ---- json schema ----------------------------------------------------------
+  "json.schemaDownload.trustedDomains": {
+    "https://schemastore.azurewebsites.net/": true,
+    "https://raw.githubusercontent.com/": true,
+    "https://www.schemastore.org/": true,
+    "https://json.schemastore.org/": true,
+    "https://json-schema.org/": true,
+    "https://aka.ms": true
+  },
+
+  // ===========================================================================
+  // DIVERSOS
+  // ===========================================================================
+
+  // ---- github actions workflows ---------------------------------------------
+  "[github-actions-workflow]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+
+  // ---- shell script ---------------------------------------------------------
+  "[shellscript]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+
+  // ---- docker ---------------------------------------------------------------
+  "[dockercompose]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced",
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    },
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  }
+}

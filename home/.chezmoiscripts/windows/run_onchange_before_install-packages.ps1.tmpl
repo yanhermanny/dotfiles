@@ -93,6 +93,25 @@ function Install-PipxPackage {
   pipx install $Package
 }
 
+# ---- vscode extensions -------------------------------------------------------
+function Test-VSCodeExtensionInstalled {
+  param([string]$Name, [string]$Id)
+
+  $installed = code --list-extensions 2>$null
+  if ($installed -contains $Id) {
+    Log "[vscode] Ignorando: extensão $Name já instalada" -Level Comment
+    return $true
+  }
+  return $false
+}
+
+function Install-VSCodeExtension {
+  param([string]$Name, [string]$Id)
+
+  Log "[vscode] Instalando extensão $Name..." -Level Command
+  code --install-extension $Id --force
+}
+
 # ---- hooks -------------------------------------------------------------------
 function Invoke-Hook {
   param([string]$Command)
@@ -222,6 +241,33 @@ if (-not (Test-PipxInstalled "{{ .name }}")) {
   {{- end }}
 }
 {{- end }}
+{{- end }}
+
+{{- with .vscode_extensions }}
+
+# ---- vscode extensions -------------------------------------------------------
+Log "`n[chezmoi] Instalando extensões do VSCode..." -Level Task
+
+if (-not (Test-Command "code")) {
+  Log "[vscode] Comando 'code' não encontrado. Ignorando instalação de extensões." -Level Warning
+}
+else {
+{{- range . }}
+  if (-not (Test-VSCodeExtensionInstalled "{{ .name }}" "{{ .id }}")) {
+    {{- with .pre_install }}
+    {{- range . }}
+    Invoke-Hook '{{ . }}'
+    {{- end }}
+    {{- end }}
+    Install-VSCodeExtension "{{ .name }}" "{{ .id }}"
+    {{- with .post_install }}
+    {{- range . }}
+    Invoke-Hook '{{ . }}'
+    {{- end }}
+    {{- end }}
+  }
+{{- end }}
+}
 {{- end }}
 {{- end }}
 

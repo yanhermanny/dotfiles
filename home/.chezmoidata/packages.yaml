@@ -86,3 +86,54 @@ packages:
     pip:
       - name: pipx
     pipx: []
+    vscode_extensions:
+      - name: Project Manager
+        id: alefragnani.project-manager
+      - name: markdownlint
+        id: davidanson.vscode-markdownlint
+      - name: GitLens
+        id: eamodio.gitlens
+      - name: Prettier SQL VSCode
+        id: inferrinizzard.prettier-sql-vscode
+      - name: Path Autocomplete
+        id: ionutvmi.path-autocomplete
+      - name: Statusbar error
+        id: joeberria.statusbarerror
+      - name: AHK++ (AutoHotkey Plus Plus)
+        id: mark-wiemer.vscode-autohotkey-plus-plus
+      - name: Rainbow CSV
+        id: mechatroner.rainbow-csv
+      - name: WSL
+        id: ms-vscode-remote.remote-wsl
+      - name: PowerShell
+        id: ms-vscode.powershell
+      - name: Material Icon Theme
+        id: pkief.material-icon-theme
+      - name: Language Support for Java(TM) by Red Hat
+        id: redhat.java
+      - name: XML
+        id: redhat.vscode-xml
+      - name: YAML
+        id: redhat.vscode-yaml
+      - name: multi-command
+        id: ryuta46.multi-command
+      - name: Markdown Preview Enhanced
+        id: shd101wyy.markdown-preview-enhanced
+      - name: ShellCheck
+        id: timonwong.shellcheck
+      - name: Spring Boot Extension Pack
+        id: vmware.vscode-boot-dev-pack
+      - name: Debugger for Java
+        id: vscjava.vscode-java-debug
+      - name: Project Manager for Java
+        id: vscjava.vscode-java-dependency
+      - name: Test Runner for Java
+        id: vscjava.vscode-java-test
+      - name: Maven for Java
+        id: vscjava.vscode-maven
+      - name: TODO Highlight
+        id: wayou.vscode-todo-highlight
+      - name: Markdown PDF
+        id: yzane.markdown-pdf
+      - name: One Dark Pro
+        id: zhuangtongfa.material-theme
