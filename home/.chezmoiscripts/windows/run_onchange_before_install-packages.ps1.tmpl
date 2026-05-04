@@ -135,6 +135,8 @@ $env:XDG_BIN_HOME = "{{ .env.xdg_bin_home }}"
 $env:XDG_DATA_HOME = "{{ .env.xdg_data_home }}"
 $env:XDG_STATE_HOME = "{{ .env.xdg_state_home }}"
 
+$env:PATH = "$env:XDG_BIN_HOME;$env:PATH"
+
 # ==============================================================================
 # Setup do sistema
 # ==============================================================================
@@ -162,6 +164,7 @@ Log "`n[chezmoi] Instalando pacotes via winget..." -Level Task
 
 {{- range . }}
 if (-not (Test-WingetInstalled "{{ .name }}")) {
+  Log "`n[winget] {{ .name }}..." -Level
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
@@ -184,6 +187,7 @@ Log "`n[chezmoi] Instalando pacotes via Invoke-WebRequest..." -Level Task
 
 {{- range . }}
 if (-not (Test-WebRequestInstalled "{{ .name }}")) {
+  Log "`n[iwr] {{ .name }}..." -Level
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
@@ -206,6 +210,7 @@ Log "`n[chezmoi] Instalando pacotes pip..." -Level Task
 
 {{- range . }}
 if (-not (Test-PipInstalled "{{ .name }}")) {
+  Log "`n[pip] {{ .name }}..." -Level
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
@@ -228,6 +233,7 @@ Log "`n[chezmoi] Instalando pacotes pipx..." -Level Task
 
 {{- range . }}
 if (-not (Test-PipxInstalled "{{ .name }}")) {
+  Log "`n[pipx] {{ .name }}..." -Level
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
