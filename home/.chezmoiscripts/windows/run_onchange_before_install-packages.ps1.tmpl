@@ -164,7 +164,7 @@ Log "`n[chezmoi] Instalando pacotes via winget..." -Level Task
 
 {{- range . }}
 if (-not (Test-WingetInstalled "{{ .name }}")) {
-  Log "`n[winget] {{ .name }}..." -Level
+  Log "`n[winget] {{ .name }}..." -Level Task
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
@@ -187,7 +187,7 @@ Log "`n[chezmoi] Instalando pacotes via Invoke-WebRequest..." -Level Task
 
 {{- range . }}
 if (-not (Test-WebRequestInstalled "{{ .name }}")) {
-  Log "`n[iwr] {{ .name }}..." -Level
+  Log "`n[iwr] {{ .name }}..." -Level Task
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
@@ -210,7 +210,7 @@ Log "`n[chezmoi] Instalando pacotes pip..." -Level Task
 
 {{- range . }}
 if (-not (Test-PipInstalled "{{ .name }}")) {
-  Log "`n[pip] {{ .name }}..." -Level
+  Log "`n[pip] {{ .name }}..." -Level Task
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
@@ -233,7 +233,7 @@ Log "`n[chezmoi] Instalando pacotes pipx..." -Level Task
 
 {{- range . }}
 if (-not (Test-PipxInstalled "{{ .name }}")) {
-  Log "`n[pipx] {{ .name }}..." -Level
+  Log "`n[pipx] {{ .name }}..." -Level Task
   {{- with .pre_install }}
   {{- range . }}
   Invoke-Hook '{{ . }}'
