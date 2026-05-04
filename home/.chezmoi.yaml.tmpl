@@ -5,7 +5,7 @@
 {{- $isWindows := eq .chezmoi.os "windows" }}
 {{- $isLinux := eq .chezmoi.os "linux" }}
 {{- $isWSL := (and $isLinux (.chezmoi.kernel.osrelease | lower | contains "microsoft")) }}
-{{- $isWorkMachine := eq .chezmoi.hostname "VDICOR1W53-44" }}
+{{- $isWorkMachine := eq .chezmoi.hostname "NSPP97623" }}
 {{- $xdgConfig := or (env "XDG_CONFIG_HOME") (joinPath .chezmoi.homeDir ".config") }}
 {{- $xdgBin := or (env "XDG_BIN_HOME") (joinPath .chezmoi.homeDir ".local" "bin") }}
 {{- $xdgLib := or (env "XDG_LIB_HOME") (joinPath .chezmoi.homeDir ".local" "lib") }}
