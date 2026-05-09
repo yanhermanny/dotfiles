@@ -1,0 +1,3 @@
+{{- if not .system.is_wsl }}
+etc/wsl.conf
+{{- end }}
