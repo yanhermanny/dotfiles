@@ -3,6 +3,7 @@
 {{- if not .system.is_windows }}
 .chezmoiscripts/windows/**
 Documents/
+AppData/
 **/[pP]ower[sS]hell/
 .local/bin/psenv**
 .local/bin/WindowsEnvironmentVariablesLauncher.exe
