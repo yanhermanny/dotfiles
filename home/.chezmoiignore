@@ -14,3 +14,14 @@ Documents/
 .config/rootmoi/
 .hushlogin
 {{- end }}
+
+{{- if not .system.is_wsl }}
+.local/bin/code
+.local/bin/scp
+.local/bin/sftp
+.local/bin/ssh
+.local/bin/ssh-add
+.local/bin/ssh-agent
+.local/bin/ssh-keygen
+.local/bin/ssh-keyscan
+{{- end }}

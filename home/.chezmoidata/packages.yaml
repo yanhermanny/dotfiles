@@ -66,7 +66,6 @@ packages:
       - name: GitHub.cli
       - name: jftuga.less
       - name: sharkdp.bat
-      - name: albertony.npiperelay
     invoke_web_request:
       - name: pyenv
         url: https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1
