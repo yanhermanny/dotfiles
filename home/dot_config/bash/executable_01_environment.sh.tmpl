@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # ~/.config/bash/01_environment.sh
 # --------------------------------------------------------------------------------
 # Configurações do ambiente do shell
@@ -36,9 +36,6 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}"
 
 # ---- Garante existência dos diretórios ---------------------------------------
 mkdir -p "$XDG_CONFIG_HOME" "$XDG_BIN_HOME" "$XDG_LIB_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
-
-# ---- adiciona binários do usuário no PATH ------------------------------------
-add_to_path "$XDG_BIN_HOME"
 
 # ==============================================================================
 # Variáveis gerais de ambiente
@@ -95,8 +92,10 @@ export PYENV_HOME="$PYENV_ROOT"
 [[ -d $PYENV_ROOT/shims ]] && add_to_path "$PYENV_ROOT/shims"
 {{- else }}
 export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
-[[ -d $PYENV_ROOT/bin ]] && add_to_path "$PYENV_ROOT/bin"
-eval "$(pyenv init - bash)"
+if [[ -d $PYENV_ROOT/bin ]]; then
+  add_to_path "$PYENV_ROOT/bin"
+  eval "$(pyenv init - bash)"
+fi
 {{- end }}
 
 # ---- pipx --------------------------------------------------------------------
@@ -114,6 +113,13 @@ export BAT_CONFIG_DIR="$(win_to_unix_path "${BAT_CONFIG_DIR:-$XDG_CONFIG_HOME/ba
 {{- else }}
 export BAT_CONFIG_DIR="$XDG_CONFIG_HOME/bat"
 {{- end }}
+
+# ==============================================================================
+# Priorizar no PATH
+# ==============================================================================
+
+# ---- binários do usuário -----------------------------------------------------
+add_to_path "$XDG_BIN_HOME"
 
 # ==============================================================================
 # Limpeza
