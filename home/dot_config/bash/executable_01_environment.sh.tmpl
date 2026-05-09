@@ -26,12 +26,14 @@ export XDG_BIN_HOME="$(win_to_unix_path "${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}
 export XDG_LIB_HOME="$(win_to_unix_path "$XDG_LIB_HOME")"
 export XDG_DATA_HOME="$(win_to_unix_path "${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}")"
 export XDG_STATE_HOME="$(win_to_unix_path "${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}")"
+export XDG_CACHE_HOME="$(win_to_unix_path "${XDG_CACHE_HOME:-{{ .env.xdg_cache_home }}}")"
 {{- else }}
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-{{ .env.xdg_config_home }}}"
 export XDG_BIN_HOME="${XDG_BIN_HOME:-{{ .env.xdg_bin_home }}}"
 export XDG_LIB_HOME
 export XDG_DATA_HOME="${XDG_DATA_HOME:-{{ .env.xdg_data_home }}}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-{{ .env.xdg_state_home }}}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-{{ .env.xdg_cache_home }}}"
 {{- end }}
 
 # ---- Garante existência dos diretórios ---------------------------------------

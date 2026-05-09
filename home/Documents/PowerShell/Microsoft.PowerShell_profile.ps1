@@ -25,6 +25,10 @@ if (-not $env:XDG_STATE_HOME) {
   $env:XDG_STATE_HOME = Join-Path $HOME ".local" "state"
 }
 
+if (-not $env:XDG_CACHE_HOME) {
+  $env:XDG_CACHE_HOME = Join-Path $HOME ".cache"
+}
+
 if (-not $env:XDG_BIN_HOME) {
   $env:XDG_BIN_HOME = Join-Path $HOME ".local" "bin"
 }
