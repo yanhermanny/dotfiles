@@ -17,8 +17,6 @@ packages:
       - name: libbz2-dev
       - name: libreadline-dev
       - name: libsqlite3-dev
-      - name: curl
-      - name: git
       - name: libncurses-dev
       - name: xz-utils
       - name: tk-dev
