@@ -13,6 +13,10 @@
   symlinks = {{ if .system.is_windows }}false{{ else }}true{{ end }}
 [credential]
   helper = {{ if .system.is_windows }}manager{{ else if .system.is_wsl }}"/mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe"{{ else if .system.is_linux }}cache --timeout 900{{ end }}
+{{- if .system.is_windows }}
+[http]
+  sslBackend = schannel
+{{- end }}
 [init]
   defaultBranch = main
 [color]
@@ -22,6 +26,8 @@
   rebase = false
 [push]
   autoSetupRemote = true
+[merge]
+  conflictStyle = zdiff3
 [gpg]
   format = ssh
 [commit]
@@ -29,6 +35,8 @@
   gpgsign = true
 [tag]
   gpgsign = true
+[diff]
+  colorMoved = default
 [diff "astextplain"]
   textconv = astextplain
 [filter "lfs"]
